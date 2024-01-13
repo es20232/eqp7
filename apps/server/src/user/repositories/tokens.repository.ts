@@ -100,7 +100,7 @@ export class TokensRepository {
     }
   }
 
-  async findeResetToken(token: string) {
+  async findResetToken(token: string) {
     try {
       return this.prismaService.resetPasswordToken.findUnique({
         where: {

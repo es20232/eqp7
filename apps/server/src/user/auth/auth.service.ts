@@ -203,7 +203,7 @@ export class AuthService {
   }
 
   async resetPassword(resetToken: string, newPassword: string) {
-    const token = await this.tokensRepository.findeResetToken(resetToken);
+    const token = await this.tokensRepository.findResetToken(resetToken);
 
     if (!token) {
       throw new UnauthorizedException({
