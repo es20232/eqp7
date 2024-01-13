@@ -1,5 +1,5 @@
-import { Body, Controller, Get, Param, Post, Redirect } from '@nestjs/common';
-import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, Post, Redirect, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import {
   ForgotPasswordDto,
@@ -7,6 +7,8 @@ import {
   ResetPasswordDto,
   SignUpDto,
 } from './dto/auth.dto';
+import { AuthGuard } from 'src/guards/auth.guard';
+import { User, UserData } from 'src/decorators/user.decorator';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -51,5 +53,12 @@ export class AuthController {
     @Body() body: ResetPasswordDto,
   ) {
     return this.authService.resetPassword(resetToken, body.password);
+  }
+
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth('jwt')
+  @Get('/me')
+  me(@User() user: UserData) {
+    return user
   }
 }
