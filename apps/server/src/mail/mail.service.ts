@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, ServiceUnavailableException } from '@nestjs/common';
 import { google } from 'googleapis';
 import * as nodemailer from 'nodemailer';
 
@@ -43,8 +43,8 @@ export class MailService {
           clientSecret: process.env.EMAIL_CLIENT_SECRET,
         },
       });
-    } catch (err) {
-      console.log(err);
+    } catch (error) {
+      throw new InternalServerErrorException('Erro ao estabelecer conexao com o servidor de email', error);
     }
   }
 
@@ -89,7 +89,10 @@ export class MailService {
         text: emailBody,
       });
     } catch (error) {
-      throw new InternalServerErrorException(error);
+      throw new InternalServerErrorException({
+        erro: error,
+        message: 'Erro ao enviar email ao usuário',
+      })
     }
   }
 }

@@ -3,10 +3,10 @@ import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { AppModule } from './app.module';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  await app.listen(3000);
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -19,8 +19,28 @@ async function bootstrap() {
   );
 
   app.enableCors();
-  app.use(join(__dirname, '..', 'uploads'), {
+  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
     prefix: '/uploads',
   });
+
+  const config = new DocumentBuilder()
+    .setTitle('VisualSocial Demo API')
+    .setDescription('Demo API Application')
+    .setVersion('v1')
+    .addTag('auth')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+      },
+      'jwt',
+    )
+    .build()
+
+  const document = SwaggerModule.createDocument(app, config)
+  SwaggerModule.setup('api', app, document)
+
+  await app.listen(3000);
 }
 bootstrap();
