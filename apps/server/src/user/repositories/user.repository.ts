@@ -14,9 +14,11 @@ export class UserRepository {
         data,
       });
     } catch (error) {
-      throw new InternalServerErrorException('Erro na base de dados ao criar usuario', error)
+      throw new InternalServerErrorException(
+        'Erro na base de dados ao criar usuário',
+        error,
+      );
     }
-
   }
 
   async updateUser(data: Prisma.UserUpdateInput, id: number) {
@@ -28,7 +30,25 @@ export class UserRepository {
         data,
       });
     } catch (error) {
-      throw new InternalServerErrorException('Erro na base de dados ao atualizar usuario', error)
+      throw new InternalServerErrorException(
+        'Erro na base de dados ao atualizar usuário',
+        error,
+      );
+    }
+  }
+
+  async getUser(id: number) {
+    try {
+      return this.prismaService.user.findUnique({
+        where: {
+          id,
+        },
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Erro na base de dados ao buscar usuário por id',
+        error,
+      );
     }
   }
 
@@ -38,7 +58,10 @@ export class UserRepository {
         data: unverifiedUser,
       });
     } catch (error) {
-      throw new InternalServerErrorException('Erro na base de dados ao criar usuario nao verificado', error)
+      throw new InternalServerErrorException(
+        'Erro na base de dados ao criar usuário não verificado',
+        error,
+      );
     }
   }
 
@@ -50,7 +73,10 @@ export class UserRepository {
         },
       });
     } catch (error) {
-      throw new InternalServerErrorException('Erro na base de dados ao buscar usuario por email', error)
+      throw new InternalServerErrorException(
+        'Erro na base de dados ao buscar usuário por email',
+        error,
+      );
     }
   }
 
@@ -62,7 +88,10 @@ export class UserRepository {
         },
       });
     } catch (error) {
-      throw new InternalServerErrorException('Erro na base de dados ao buscar usuario nao verificado por email', error)
+      throw new InternalServerErrorException(
+        'Erro na base de dados ao buscar usuário não verificado por email',
+        error,
+      );
     }
   }
 
@@ -74,7 +103,10 @@ export class UserRepository {
         },
       });
     } catch (error) {
-      throw new InternalServerErrorException('Erro na base de dados ao buscar usuario por username', error)
+      throw new InternalServerErrorException(
+        'Erro na base de dados ao buscar usuário por username',
+        error,
+      );
     }
   }
 
@@ -86,7 +118,10 @@ export class UserRepository {
         },
       });
     } catch (error) {
-      throw new InternalServerErrorException('Erro na base de dados ao buscar usuario nao verificado por username', error)
+      throw new InternalServerErrorException(
+        'Erro na base de dados ao buscar usuário não verificado por username',
+        error,
+      );
     }
   }
 
@@ -98,7 +133,10 @@ export class UserRepository {
         },
       });
     } catch (error) {
-      throw new InternalServerErrorException('Erro na base de dados ao deletar usuario nao verificado', error)
+      throw new InternalServerErrorException(
+        'Erro na base de dados ao deletar usuário não verificado',
+        error,
+      );
     }
   }
 
@@ -108,8 +146,10 @@ export class UserRepository {
     try {
       return this.prismaService.$transaction(transactionFunction);
     } catch (error) {
-      throw new InternalServerErrorException('Erro ao rodar transacao na base de dados', error)
+      throw new InternalServerErrorException(
+        'Erro ao rodar transação na base de dados',
+        error,
+      );
     }
-
   }
 }

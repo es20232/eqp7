@@ -1,5 +1,18 @@
-import { Body, Controller, Get, Param, Post, Redirect, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  Param,
+  ParseFilePipeBuilder,
+  Post,
+  Redirect,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiConsumes, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { diskStorage } from 'multer';
 import { AuthService } from './auth.service';
 import {
   ForgotPasswordDto,
@@ -7,21 +20,46 @@ import {
   ResetPasswordDto,
   SignUpDto,
 } from './dto/auth.dto';
-import { AuthGuard } from 'src/guards/auth.guard';
-import { User, UserData } from 'src/decorators/user.decorator';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @UseInterceptors(
+    FileInterceptor('profilePicture', {
+      storage: diskStorage({
+        destination: 'uploads',
+        filename: (req, file, callback) => {
+          const uniqueSuffix = `${Date.now()}_${Math.floor(
+            Math.random() * 10000 + 10000,
+          )}`;
+
+          const filename = `${uniqueSuffix}_${file.originalname}`;
+
+          callback(null, filename);
+        },
+      }),
+    }),
+  )
+  @ApiConsumes('multipart/form-data')
   @ApiOkResponse({
     description:
       'Cadastra um novo usuário não verificado no sistema. Para ter os privilégios de um usuário normal, deve ser preciso haver a validação do email por parte do usuário',
   })
   @Post('/sign-up')
-  signUp(@Body() body: SignUpDto) {
-    return this.authService.signUp(body);
+  signUp(
+    @Body() body: SignUpDto,
+    @UploadedFile(
+      new ParseFilePipeBuilder()
+        .addFileTypeValidator({ fileType: '.(png|jpeg|jpg)' })
+        .build({
+          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+        }),
+    )
+    profilePicture: Express.Multer.File,
+  ) {
+    return this.authService.signUp(body, profilePicture);
   }
 
   @Redirect(process.env.SUCCESSFUL_SIGN_UP_LINK, 302)
@@ -53,12 +91,5 @@ export class AuthController {
     @Body() body: ResetPasswordDto,
   ) {
     return this.authService.resetPassword(resetToken, body.password);
-  }
-
-  @UseGuards(AuthGuard)
-  @ApiBearerAuth('jwt')
-  @Get('/me')
-  me(@User() user: UserData) {
-    return user
   }
 }

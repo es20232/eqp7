@@ -56,6 +56,9 @@ export class SignUpDto {
       'A senha deve conter pelo menos 6 caracteres, incluindo pelo menos um dígito, uma letra minúscula uma letra maiúscula',
   })
   password: string;
+
+  @ApiProperty({ type: 'string', format: 'binary' })
+  profilePicture: Express.Multer.File;
 }
 
 export class ResendConfirmationLinkDto {

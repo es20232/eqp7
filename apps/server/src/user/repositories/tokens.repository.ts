@@ -1,6 +1,5 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import e from 'express';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -13,9 +12,11 @@ export class TokensRepository {
         data,
       });
     } catch (error) {
-      throw new InternalServerErrorException('Erro na base de dados ao criar token de email', error)
+      throw new InternalServerErrorException(
+        'Erro na base de dados ao criar token de email',
+        error,
+      );
     }
-
   }
 
   async updateEmailTokenByUserId(
@@ -30,9 +31,11 @@ export class TokensRepository {
         },
       });
     } catch (error) {
-      throw new InternalServerErrorException('Erro na base de dados ao atualizar token de email', error)
+      throw new InternalServerErrorException(
+        'Erro na base de dados ao atualizar token de email',
+        error,
+      );
     }
-
   }
 
   async findEmailToken(token: string) {
@@ -43,9 +46,11 @@ export class TokensRepository {
         },
       });
     } catch (error) {
-      throw new InternalServerErrorException('Erro na base de dados ao buscar token de email', error)
+      throw new InternalServerErrorException(
+        'Erro na base de dados ao buscar token de email',
+        error,
+      );
     }
-
   }
 
   async findEmailTokenByUserId(id: number) {
@@ -56,9 +61,11 @@ export class TokensRepository {
         },
       });
     } catch (error) {
-      throw new InternalServerErrorException('Erro na base de dados ao buscar token de email por id de usuario', error)
+      throw new InternalServerErrorException(
+        'Erro na base de dados ao buscar token de email por id de usuário',
+        error,
+      );
     }
-
   }
 
   async deleteEmailTokenByUserId(id: number) {
@@ -69,7 +76,10 @@ export class TokensRepository {
         },
       });
     } catch (error) {
-      throw new InternalServerErrorException('Erro na base de dados ao deletar token de email', error)
+      throw new InternalServerErrorException(
+        'Erro na base de dados ao deletar token de email',
+        error,
+      );
     }
   }
 
@@ -79,9 +89,11 @@ export class TokensRepository {
         data,
       });
     } catch (error) {
-      throw new InternalServerErrorException('Erro na base de dados ao criar token de redefinicao de senha', error)
+      throw new InternalServerErrorException(
+        'Erro na base de dados ao criar token de redefinição de senha',
+        error,
+      );
     }
-
   }
 
   async updateResetTokenByUserId(
@@ -96,7 +108,10 @@ export class TokensRepository {
         data,
       });
     } catch (error) {
-      throw new InternalServerErrorException('Erro na base de dados ao atualizar token de redefinicao de senha', error)
+      throw new InternalServerErrorException(
+        'Erro na base de dados ao atualizar token de redefinição de senha',
+        error,
+      );
     }
   }
 
@@ -108,7 +123,10 @@ export class TokensRepository {
         },
       });
     } catch (error) {
-      throw new InternalServerErrorException('Erro na base de dados ao buscar token de redefinicao de senha', error)
+      throw new InternalServerErrorException(
+        'Erro na base de dados ao buscar token de redefinição de senha',
+        error,
+      );
     }
   }
 
@@ -120,9 +138,11 @@ export class TokensRepository {
         },
       });
     } catch (error) {
-      throw new InternalServerErrorException('Erro na base de dados ao buscar token de redefinicao de senha por id de usuario', error)
+      throw new InternalServerErrorException(
+        'Erro na base de dados ao buscar token de redefinição de senha por id de usuário',
+        error,
+      );
     }
-
   }
 
   async deleteResetTokenByUserId(userId: number) {
@@ -133,7 +153,10 @@ export class TokensRepository {
         },
       });
     } catch (error) {
-      throw new InternalServerErrorException('Erro na base de dados ao deletar token de redefinicao de senha', error)
+      throw new InternalServerErrorException(
+        'Erro na base de dados ao deletar token de redefinição de senha',
+        error,
+      );
     }
   }
 }

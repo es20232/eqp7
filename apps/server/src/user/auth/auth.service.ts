@@ -24,7 +24,10 @@ export class AuthService {
     this.jwtSecret = this.getTokenSecret();
   }
 
-  async signUp({ name, email, password, username }: SignUpDto) {
+  async signUp(
+    { name, email, password, username }: SignUpDto,
+    profilePicture: Express.Multer.File,
+  ) {
     const emailExists = await this.userRepository.findUserByEmail(email);
 
     const unverifiedEmailExists =
@@ -46,14 +49,12 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const profilePicture = '';
-
     const user = await this.userRepository.createUnverifiedUser({
       name,
       email,
       password: hashedPassword,
       username,
-      profilePicture,
+      profilePicture: profilePicture.filename,
     });
 
     return this.generateEmailToken(email, user.id);
@@ -70,10 +71,7 @@ export class AuthService {
     }
 
     try {
-      const payload = jwt.verify(
-        emailToken,
-        this.jwtSecret,
-      ) as jwt.JwtPayload;
+      const payload = jwt.verify(emailToken, this.jwtSecret) as jwt.JwtPayload;
 
       const user = await this.userRepository.findUnverifiedUserByEmail(
         payload.email,
@@ -92,9 +90,7 @@ export class AuthService {
           profilePicture: user.profilePicture,
         });
 
-        await this.userRepository.deleteUnverifiedUser(
-          token.unverifiedUserId,
-        );
+        await this.userRepository.deleteUnverifiedUser(token.unverifiedUserId);
       });
     } catch (error) {
       if (error instanceof jwt.TokenExpiredError) {
@@ -160,46 +156,46 @@ export class AuthService {
   }
 
   async generateResetToken(email: string) {
-      const user = await this.userRepository.findUserByEmail(email);
+    const user = await this.userRepository.findUserByEmail(email);
 
-      if (!user) {
-        throw new NotFoundException('Email de usuário não encontrado');
-      }
+    if (!user) {
+      throw new NotFoundException('Email de usuário não encontrado');
+    }
 
-      try {
-        const resetToken = jwt.sign(
-          { name: user.name, id: user.id },
-          this.jwtSecret,
+    try {
+      const resetToken = jwt.sign(
+        { name: user.name, id: user.id },
+        this.jwtSecret,
+        {
+          expiresIn: process.env.RESET_TOKEN_EXPIRATION,
+        },
+      );
+
+      const userHasResetToken =
+        await this.tokensRepository.findResetTokenByUserId(user.id);
+
+      if (userHasResetToken) {
+        await this.tokensRepository.updateResetTokenByUserId(
           {
-            expiresIn: process.env.RESET_TOKEN_EXPIRATION,
-          },
-        );
-
-        const userHasResetToken =
-          await this.tokensRepository.findResetTokenByUserId(user.id);
-
-        if (userHasResetToken) {
-          await this.tokensRepository.updateResetTokenByUserId(
-            {
-              token: resetToken,
-            },
-            user.id,
-          );
-        } else {
-          await this.tokensRepository.createResetToken({
             token: resetToken,
-            user: {
-              connect: {
-                id: user.id,
-              },
+          },
+          user.id,
+        );
+      } else {
+        await this.tokensRepository.createResetToken({
+          token: resetToken,
+          user: {
+            connect: {
+              id: user.id,
             },
-          });
-        }
-
-        return this.mailService.sendEmailResetPassword(email, resetToken);
-      } catch (error) {
-        throw new InternalServerErrorException(error);
+          },
+        });
       }
+
+      return this.mailService.sendEmailResetPassword(email, resetToken);
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
   }
 
   async resetPassword(resetToken: string, newPassword: string) {
