@@ -2,22 +2,32 @@ import {
   Body,
   Controller,
   Get,
+  Headers,
   HttpStatus,
   Param,
   ParseFilePipeBuilder,
   Post,
   Redirect,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiConsumes, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiConsumes,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { diskStorage } from 'multer';
+import { User } from 'src/decorators/user.decorator';
+import { AuthGuard } from 'src/guards/auth.guard';
 import { AuthService } from './auth.service';
 import {
   ForgotPasswordDto,
   ResendConfirmationLinkDto,
   ResetPasswordDto,
+  SignInDto,
   SignUpDto,
 } from './dto/auth.dto';
 
@@ -60,6 +70,18 @@ export class AuthController {
     profilePicture: Express.Multer.File,
   ) {
     return this.authService.signUp(body, profilePicture);
+  }
+
+  @Post('/sign-in')
+  singIn(@Body() body: SignInDto) {
+    return this.authService.signIn(body);
+  }
+
+  @ApiBearerAuth('jwt')
+  @UseGuards(AuthGuard)
+  @Post('/sign-out')
+  signOut(@Headers('Token-Id') tokenId: number, @User('id') userId: number) {
+    return this.authService.signOut(+tokenId, +userId);
   }
 
   @Redirect(process.env.SUCCESSFUL_SIGN_UP_LINK, 302)

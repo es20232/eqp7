@@ -61,6 +61,20 @@ export class SignUpDto {
   profilePicture: Express.Multer.File;
 }
 
+export class SignInDto {
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  user: string;
+
+  @ApiProperty({
+    minLength: 6,
+  })
+  @IsString()
+  @IsNotEmpty()
+  password: string;
+}
+
 export class ResendConfirmationLinkDto {
   @ApiProperty({
     example: 'test@test.com',
