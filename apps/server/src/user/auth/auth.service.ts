@@ -11,6 +11,7 @@ import * as jwt from 'jsonwebtoken';
 import { MailService } from 'src/mail/mail.service';
 import { TokensRepository } from '../repositories/tokens.repository';
 import { UserRepository } from '../repositories/user.repository';
+import { UserService } from '../user.service';
 import {
   ResendConfirmationLinkDto,
   SignInDto,
@@ -25,6 +26,7 @@ export class AuthService {
     private readonly userRepository: UserRepository,
     private readonly tokensRepository: TokensRepository,
     private readonly mailService: MailService,
+    private readonly userService: UserService,
   ) {
     this.jwtSecret = this.getTokenSecret();
   }
@@ -99,14 +101,19 @@ export class AuthService {
       const { accessToken, refreshToken } =
         await this.tokensRepository.generateTokens(user.name, user.id);
 
-      const token = this.tokensRepository.createRefreshToken({
+      const token = await this.tokensRepository.createRefreshToken({
         token: refreshToken,
         userId: user.id,
       });
+      const userWithProfilePictureUrl = await this.userService.getProfile(
+        user.id,
+      );
       return {
+        username: user.username,
+        profilePicture: userWithProfilePictureUrl.profilePictureUrl,
         accessToken,
         refreshToken,
-        tokenId: (await token).id,
+        tokenId: token.id,
       };
     } catch (error) {
       throw new InternalServerErrorException(error);
@@ -115,16 +122,48 @@ export class AuthService {
 
   async signOut(tokenId: number, userId: number) {
     try {
-      const token = await this.tokensRepository.findLoginTokenById(tokenId);
+      const token = await this.tokensRepository.findRefreshTokenById(tokenId);
       if (token?.userId !== userId) {
         throw new UnauthorizedException();
       }
-      await this.tokensRepository.deleteLoginTokenById(tokenId);
+      await this.tokensRepository.deleteRefreshTokenById(tokenId);
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
   }
 
+  async refresh(refreshToken: string, tokenId: number) {
+    try {
+      const foundToken =
+        await this.tokensRepository.findRefreshTokenById(tokenId);
+      if (foundToken) {
+        const user = await this.userRepository.findUserById(foundToken.userId);
+        if (!user) {
+          throw new UnauthorizedException(
+            'Usuário referente ao token não encontrado',
+          );
+        }
+        const isMatch = foundToken?.token === refreshToken;
+        console.log(refreshToken);
+        console.log(foundToken.token);
+
+        if (isMatch) {
+          const { accessToken, refreshToken } =
+            await this.tokensRepository.generateTokens(user.name, user.id);
+          const token = await this.tokensRepository.updateRefreshTokenById(
+            refreshToken,
+            tokenId,
+          );
+          return { accessToken, refreshToken, tokenId: token.id };
+        }
+        throw new UnauthorizedException(
+          'Token enviado e token da base de dados não coincidem',
+        );
+      }
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
   async confirmEmail(emailToken: string) {
     const token = await this.tokensRepository.findEmailToken(emailToken);
 

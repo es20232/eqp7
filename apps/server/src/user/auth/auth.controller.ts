@@ -16,6 +16,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
   ApiConsumes,
+  ApiHeader,
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -82,6 +83,30 @@ export class AuthController {
   @Post('/sign-out')
   signOut(@Headers('Token-Id') tokenId: number, @User('id') userId: number) {
     return this.authService.signOut(+tokenId, +userId);
+  }
+
+  @ApiBearerAuth('jwt')
+  @ApiHeader({
+    name: 'Token-Id',
+  })
+  @ApiOkResponse({
+    schema: {
+      example: {
+        accessToken: 'string',
+        refreshToken: 'string',
+        tokenId: 'number',
+      },
+    },
+  })
+  @Post('/refresh')
+  refresh(
+    @Headers('Token-Id') tokenId: string,
+    @Headers('Authorization') token: string,
+  ) {
+    const refreshToken = token.split('Bearer ')[1];
+    const numericTokenId = Number(tokenId);
+
+    return this.authService.refresh(refreshToken, numericTokenId);
   }
 
   @Redirect(process.env.SUCCESSFUL_SIGN_UP_LINK, 302)

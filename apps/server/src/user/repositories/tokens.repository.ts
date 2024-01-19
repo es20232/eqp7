@@ -197,7 +197,7 @@ export class TokensRepository {
     }
   }
 
-  async findLoginTokenById(tokenId: number) {
+  async findRefreshTokenById(tokenId: number) {
     try {
       return this.prismaService.refreshToken.findUnique({
         where: {
@@ -211,7 +211,24 @@ export class TokensRepository {
       );
     }
   }
-  async deleteLoginTokenById(tokenId: number) {
+  async updateRefreshTokenById(refreshToken: string, tokenId: number) {
+    try {
+      return this.prismaService.refreshToken.update({
+        where: {
+          id: tokenId,
+        },
+        data: {
+          token: refreshToken,
+        },
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Erro na base de dados ao atualizar refresh token',
+        error,
+      );
+    }
+  }
+  async deleteRefreshTokenById(tokenId: number) {
     try {
       return this.prismaService.refreshToken.delete({
         where: {
