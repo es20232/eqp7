@@ -34,7 +34,7 @@ export class UserService {
   async updateUser(
     { name, username }: UpdateUserDto,
     userId: number,
-    profilePicture: Express.Multer.File,
+    profilePicture?: Express.Multer.File,
   ) {
     const user = await this.userRepository.findUserById(userId);
     if (!user) throw new NotFoundException('Usuário não encontrado');

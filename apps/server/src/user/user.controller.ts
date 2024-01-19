@@ -58,21 +58,11 @@ export class UserController {
         .addFileTypeValidator({ fileType: '.(png|jpeg|jpg)' })
         .build({
           errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+          fileIsRequired: false,
         }),
     )
-    profilePicture: Express.Multer.File,
+    profilePicture?: Express.Multer.File,
   ) {
-    // Verificar se o arquivo está presente
-    if (!profilePicture) {
-      throw new HttpException(
-        {
-          message: 'File is required',
-          error: 'Unprocessable Entity',
-          statusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-        },
-        HttpStatus.UNPROCESSABLE_ENTITY,
-      );
-    }
     return this.userService.updateUser(body, userId, profilePicture);
   }
 }
