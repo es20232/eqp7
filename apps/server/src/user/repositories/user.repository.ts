@@ -79,6 +79,18 @@ export class UserRepository {
       );
     }
   }
+  async findUserById(userId: number) {
+    try {
+      return this.prismaService.user.findUnique({
+        where: { id: userId },
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Erro na base de dados ao buscar usuário pelo id',
+        error,
+      );
+    }
+  }
 
   async findUnverifiedUserByEmail(email: string) {
     try {

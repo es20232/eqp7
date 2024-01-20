@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -10,7 +11,12 @@ import * as jwt from 'jsonwebtoken';
 import { MailService } from 'src/mail/mail.service';
 import { TokensRepository } from '../repositories/tokens.repository';
 import { UserRepository } from '../repositories/user.repository';
-import { ResendConfirmationLinkDto, SignUpDto } from './dto/auth.dto';
+import { UserService } from '../user.service';
+import {
+  ResendConfirmationLinkDto,
+  SignInDto,
+  SignUpDto,
+} from './dto/auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -20,6 +26,7 @@ export class AuthService {
     private readonly userRepository: UserRepository,
     private readonly tokensRepository: TokensRepository,
     private readonly mailService: MailService,
+    private readonly userService: UserService,
   ) {
     this.jwtSecret = this.getTokenSecret();
   }
@@ -60,6 +67,103 @@ export class AuthService {
     return this.generateEmailToken(email, user.id);
   }
 
+  async signIn(body: SignInDto) {
+    const unverifiedUser =
+      (await this.userRepository.findUnverifiedUserByEmail(body.user)) ||
+      (await this.userRepository.findUnverifiedUserByUsername(body.user));
+
+    if (unverifiedUser) {
+      throw new ForbiddenException({
+        message:
+          'Email passível de validação. Por favor, cheque seu email e confirme seu cadastro através do link que nós enviamos. Não encontrou? Clique no botão abaixo para que um novo link seja enviado ao seu email.',
+        cause: 'unverifiedUser',
+        userEmail: unverifiedUser.email,
+      });
+    }
+    const user =
+      (await this.userRepository.findUserByEmail(body.user)) ||
+      (await this.userRepository.findUserByUsername(body.user));
+
+    if (!user) {
+      throw new UnauthorizedException('Credenciais Inválidas: user');
+    }
+    try {
+      const hashedPassword = user.password;
+
+      const isValidPassword = await bcrypt.compare(
+        body.password,
+        hashedPassword,
+      );
+
+      if (!isValidPassword) {
+        throw new UnauthorizedException('Credenciais Inválidas: senha');
+      }
+      const { accessToken, refreshToken } =
+        await this.tokensRepository.generateTokens(user.name, user.id);
+
+      const token = await this.tokensRepository.createRefreshToken({
+        token: refreshToken,
+        userId: user.id,
+      });
+      const userWithProfilePictureUrl = await this.userService.getProfile(
+        user.id,
+      );
+      return {
+        username: user.username,
+        profilePicture: userWithProfilePictureUrl.profilePictureUrl,
+        accessToken,
+        refreshToken,
+        tokenId: token.id,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+
+  async signOut(tokenId: number, userId: number) {
+    try {
+      const token = await this.tokensRepository.findRefreshTokenById(tokenId);
+      if (token?.userId !== userId) {
+        throw new UnauthorizedException();
+      }
+      await this.tokensRepository.deleteRefreshTokenById(tokenId);
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+
+  async refresh(refreshToken: string, tokenId: number) {
+    try {
+      const foundToken =
+        await this.tokensRepository.findRefreshTokenById(tokenId);
+      if (foundToken) {
+        const user = await this.userRepository.findUserById(foundToken.userId);
+        if (!user) {
+          throw new UnauthorizedException(
+            'Usuário referente ao token não encontrado',
+          );
+        }
+        const isMatch = foundToken?.token === refreshToken;
+        console.log(refreshToken);
+        console.log(foundToken.token);
+
+        if (isMatch) {
+          const { accessToken, refreshToken } =
+            await this.tokensRepository.generateTokens(user.name, user.id);
+          const token = await this.tokensRepository.updateRefreshTokenById(
+            refreshToken,
+            tokenId,
+          );
+          return { accessToken, refreshToken, tokenId: token.id };
+        }
+        throw new UnauthorizedException(
+          'Token enviado e token da base de dados não coincidem',
+        );
+      }
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
   async confirmEmail(emailToken: string) {
     const token = await this.tokensRepository.findEmailToken(emailToken);
 
