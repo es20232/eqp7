@@ -1,14 +1,11 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import * as jwt from 'jsonwebtoken';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class TokensRepository {
   private readonly jwtSecret: string;
-  constructor(private readonly prismaService: PrismaService) {
-    this.jwtSecret = this.getTokenSecret();
-  }
+  constructor(private readonly prismaService: PrismaService) {}
 
   async createEmailToken(data: Prisma.ConfirmEmailTokenCreateInput) {
     try {
@@ -163,28 +160,8 @@ export class TokensRepository {
       );
     }
   }
-  async generateTokens(name: string, id: number) {
-    try {
-      const accessToken = jwt.sign({ name, id }, this.jwtSecret, {
-        expiresIn: process.env.ACCESS_TOKEN_EXPIRATION,
-      });
 
-      const refreshToken = jwt.sign({ name, id }, this.jwtSecret, {
-        expiresIn: process.env.REFRESH_TOKEN_EXPIRATION,
-      });
-
-      return { accessToken, refreshToken };
-    } catch (error) {
-      throw new InternalServerErrorException(error);
-    }
-  }
-  private getTokenSecret() {
-    if (!process.env.TOKEN_SECRET) {
-      throw new Error('TOKEN_SECRET is not defined in environment variables');
-    }
-    return process.env.TOKEN_SECRET;
-  }
-  async createRefreshToken(data: Prisma.RefreshTokenUncheckedCreateInput) {
+  async createRefreshToken(data: Prisma.RefreshTokenCreateInput) {
     try {
       return await this.prismaService.refreshToken.create({
         data,
@@ -211,6 +188,7 @@ export class TokensRepository {
       );
     }
   }
+
   async updateRefreshTokenById(refreshToken: string, tokenId: number) {
     try {
       return this.prismaService.refreshToken.update({

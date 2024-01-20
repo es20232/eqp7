@@ -66,9 +66,10 @@ export class AuthController {
         .addFileTypeValidator({ fileType: '.(png|jpeg|jpg)' })
         .build({
           errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+          fileIsRequired: false,
         }),
     )
-    profilePicture: Express.Multer.File,
+    profilePicture?: Express.Multer.File,
   ) {
     return this.authService.signUp(body, profilePicture);
   }

@@ -1,6 +1,6 @@
 import { ApiProperty, OmitType, PartialType } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
-import { SignUpDto } from './dto/auth.dto';
+import { SignUpDto } from '../auth/dto/auth.dto';
 
 export class UserResponseDto {
   @ApiProperty()
@@ -19,15 +19,16 @@ export class UserResponseDto {
   password: string;
 
   @Exclude()
-  profilePicture: string;
+  profilePicture?: string | null;
 
   @ApiProperty()
-  profilePictureUrl: string;
+  profilePictureUrl?: string | null;
 
   constructor(partial: Partial<UserResponseDto>) {
     Object.assign(this, partial);
   }
 }
+
 export class UpdateUserDto extends PartialType(
   OmitType(SignUpDto, ['email', 'password'] as const),
 ) {}
