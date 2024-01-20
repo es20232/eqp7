@@ -51,7 +51,7 @@ export class UserService {
     }
     try {
       const updatedUser = await this.userRepository.updateUser(
-        { name, username, profilePicture: profilePicture.filename },
+        { name, username, profilePicture: profilePicture?.filename },
         userId,
       );
       const { accessToken, refreshToken } =
