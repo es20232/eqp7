@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsAlphanumeric,
   IsEmail,
@@ -57,8 +57,8 @@ export class SignUpDto {
   })
   password: string;
 
-  @ApiProperty({ type: 'string', format: 'binary' })
-  profilePicture: Express.Multer.File;
+  @ApiPropertyOptional({ type: 'string', format: 'binary' })
+  profilePicture?: Express.Multer.File;
 }
 
 export class SignInDto {

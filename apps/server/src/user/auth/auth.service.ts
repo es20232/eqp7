@@ -33,7 +33,7 @@ export class AuthService {
 
   async signUp(
     { name, email, password, username }: SignUpDto,
-    profilePicture: Express.Multer.File,
+    profilePicture?: Express.Multer.File,
   ) {
     const emailExists = await this.userRepository.findUserByEmail(email);
 
@@ -61,7 +61,7 @@ export class AuthService {
       email,
       password: hashedPassword,
       username,
-      profilePicture: profilePicture.filename,
+      profilePicture: profilePicture?.filename,
     });
 
     return this.generateEmailToken(email, user.id);
@@ -80,15 +80,15 @@ export class AuthService {
         userEmail: unverifiedUser.email,
       });
     }
-    const user =
+    const userExists =
       (await this.userRepository.findUserByEmail(body.user)) ||
       (await this.userRepository.findUserByUsername(body.user));
 
-    if (!user) {
-      throw new UnauthorizedException('Credenciais Inválidas: user');
+    if (!userExists) {
+      throw new UnauthorizedException('Credenciais Inválidas');
     }
     try {
-      const hashedPassword = user.password;
+      const hashedPassword = userExists.password;
 
       const isValidPassword = await bcrypt.compare(
         body.password,
@@ -96,21 +96,25 @@ export class AuthService {
       );
 
       if (!isValidPassword) {
-        throw new UnauthorizedException('Credenciais Inválidas: senha');
+        throw new UnauthorizedException('Credenciais Inválidas');
       }
-      const { accessToken, refreshToken } =
-        await this.tokensRepository.generateTokens(user.name, user.id);
+      const { accessToken, refreshToken } = await this.generateTokens(
+        userExists.name,
+        userExists.id,
+      );
 
       const token = await this.tokensRepository.createRefreshToken({
         token: refreshToken,
-        userId: user.id,
+        user: {
+          connect: {
+            id: userExists.id,
+          },
+        },
       });
-      const userWithProfilePictureUrl = await this.userService.getProfile(
-        user.id,
-      );
+      const user = await this.userService.getProfile(userExists.id);
+
       return {
-        username: user.username,
-        profilePicture: userWithProfilePictureUrl.profilePictureUrl,
+        user,
         accessToken,
         refreshToken,
         tokenId: token.id,
@@ -148,8 +152,10 @@ export class AuthService {
         console.log(foundToken.token);
 
         if (isMatch) {
-          const { accessToken, refreshToken } =
-            await this.tokensRepository.generateTokens(user.name, user.id);
+          const { accessToken, refreshToken } = await this.generateTokens(
+            user.name,
+            user.id,
+          );
           const token = await this.tokensRepository.updateRefreshTokenById(
             refreshToken,
             tokenId,
@@ -343,6 +349,22 @@ export class AuthService {
 
       await this.tokensRepository.deleteResetTokenByUserId(token.userId);
     });
+  }
+
+  async generateTokens(name: string, id: number) {
+    try {
+      const accessToken = jwt.sign({ name, id }, this.jwtSecret, {
+        expiresIn: process.env.ACCESS_TOKEN_EXPIRATION,
+      });
+
+      const refreshToken = jwt.sign({ name, id }, this.jwtSecret, {
+        expiresIn: process.env.REFRESH_TOKEN_EXPIRATION,
+      });
+
+      return { accessToken, refreshToken };
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
   }
 
   private getTokenSecret() {

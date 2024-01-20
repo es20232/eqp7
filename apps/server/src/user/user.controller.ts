@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  HttpException,
   HttpStatus,
   ParseFilePipeBuilder,
   Put,
@@ -10,13 +9,13 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { diskStorage } from 'multer';
 import { User } from 'src/decorators/user.decorator';
 import { AuthGuard } from 'src/guards/auth.guard';
-import { UpdateUserDto } from './auth/user.dto';
+import { UpdateUserDto } from './dto/user.dto';
 import { UserService } from './user.service';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
 
 @ApiTags('user')
 @Controller('user')
