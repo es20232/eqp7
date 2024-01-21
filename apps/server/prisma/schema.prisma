@@ -17,7 +17,7 @@ model User {
   username           String              @unique
   email              String              @unique
   password           String
-  profilePicture     String
+  profilePicture     String?
   resetPasswordToken ResetPasswordToken?
   refreshToken       RefreshToken[]
 }
@@ -28,7 +28,7 @@ model UnverifiedUser {
   username          String             @unique
   email             String             @unique
   password          String
-  profilePicture    String
+  profilePicture    String?
   confirmEmailToken ConfirmEmailToken?
 }
 

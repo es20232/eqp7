@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
+import { MailModule } from 'src/mail/mail.module';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { AuthController } from './auth/auth.controller';
 import { AuthService } from './auth/auth.service';
-import { UserRepository } from './repositories/user.repository';
 import { TokensRepository } from './repositories/tokens.repository';
-import { MailModule } from 'src/mail/mail.module';
+import { UserRepository } from './repositories/user.repository';
 import { UserController } from './user.controller';
 import { UserService } from './user.service';
 
