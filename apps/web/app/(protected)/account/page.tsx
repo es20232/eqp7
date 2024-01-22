@@ -1,18 +1,18 @@
-import Image from "next/image"
-import Link from "next/link"
+import Image from 'next/image'
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Separator } from "@/components/ui/separator"
+import { Separator } from '@/components/ui/separator'
 
 export default function Account() {
   return (
     <div>
       <div className="m h-[30vh] w-full bg-blue-100" />
-      <div className="mx-auto flex max-w-5xl justify-between max-w-5xl py-5 px-4 sm:flex-row sm:gap-6 sm:px-0">
+      <div className="mx-auto flex max-w-7xl justify-between px-4 py-5 sm:flex-row sm:gap-6 sm:px-0">
         <div className="flex gap-6">
           <Image
             src="/test.jpg"
             alt="Foto de perfil"
-            className="aspect-square -translate-y-1/2 rounded-full object-cover ring-4 ring-whinte"
+            className="ring-whinte aspect-square -translate-y-1/2 rounded-full object-cover ring-4"
             width={180}
             height={180}
           />
@@ -53,5 +53,5 @@ export default function Account() {
         </div>
       </div>
     </div>
-  );
+  )
 }
