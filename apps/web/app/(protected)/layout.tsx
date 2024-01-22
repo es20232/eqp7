@@ -4,12 +4,15 @@ import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useUser } from '../hooks/useUser'
+import { getInitials } from '@/lib/utils'
 
 export default function ProtectedLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const user = useUser()
   return (
     <div className="min-h-[100svh] w-full ">
       <header className=" border-b px-4 py-2">
@@ -28,11 +31,10 @@ export default function ProtectedLayout({
           <Link href="/account">
             <div className="flex items-center gap-4">
               <Avatar>
-                <AvatarImage src="https://github.com/shadcn.png" />
-                <AvatarFallback>VS</AvatarFallback>
+                <AvatarFallback>{getInitials(user?.name)}</AvatarFallback>
               </Avatar>
               <span className="hidden text-sm font-medium md:block">
-                usuario
+                {user?.username}
               </span>
             </div>
           </Link>
