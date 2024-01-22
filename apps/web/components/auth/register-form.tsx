@@ -46,19 +46,14 @@ export function RegisterForm() {
         },
       )
 
-      const data = await response.json()
-
       if (response.ok) {
         router.push('/auth/verify-email')
-      } else {
-        setErrorMessage(data.message)
+        return
       }
-
-      console.log(data)
+      const error = await response.json()
+      setErrorMessage(error.message)
     } catch (error) {
-      setErrorMessage(
-        'Ocorreu um erro inesperado. Tente novamente em alguns instantes.',
-      )
+      setErrorMessage('Ocorreu um erro inesperado')
     }
     setIsLoading(false)
   }
