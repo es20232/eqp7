@@ -9,7 +9,7 @@ export const FormError = ({ message }: FormErrorProps) => {
 
   return (
     <div className="flex items-center gap-x-2 rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-      <AlertTriangle className="mt-0.5 h-4 w-4 self-start" />
+      <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 self-start" />
       <p>{message}</p>
     </div>
   )
