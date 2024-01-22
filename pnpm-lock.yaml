@@ -176,6 +176,9 @@ importers:
       next-auth:
         specifier: 5.0.0-beta.5
         version: 5.0.0-beta.5(next@14.0.4)(react@18.2.0)
+      prisma:
+        specifier: ^5.8.0
+        version: 5.8.0
       react:
         specifier: ^18
         version: 18.2.0
@@ -1619,7 +1622,6 @@ packages:
       react: 18.2.0
     dev: false
 
-<<<<<<< HEAD
   /@radix-ui/react-use-callback-ref@1.0.1(@types/react@18.2.47)(react@18.2.0):
     resolution: {integrity: sha512-D94LjX4Sp0xJFVaoQOd3OO9k7tpBYNOXdVhkltUbGv2Qb9OXdrg/CpsjlZv7ia14Sylv398LswWBVVu5nqKzAQ==}
     peerDependencies:
@@ -1648,8 +1650,6 @@ packages:
       react: 18.2.0
     dev: false
 
-=======
->>>>>>> 3c0273adcb907d1cb85ab5067c7701c7eeecf4b5
   /@sinclair/typebox@0.27.8:
     resolution: {integrity: sha512-+Fj43pSMwJs4KRrH/938Uf+uAELIgVBmQzg/q1YG10djyfA3TnrU8N8XzqCh/okZdszqBQTZf96idMfE5lnwTA==}
     dev: true
