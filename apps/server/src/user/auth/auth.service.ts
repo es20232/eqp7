@@ -160,19 +160,37 @@ export class AuthService {
           );
         }
         const isMatch = foundToken?.token === refreshToken;
-        console.log(refreshToken);
-        console.log(foundToken.token);
 
         if (isMatch) {
           const { accessToken, refreshToken } = await this.generateTokens(
             user.name,
             user.id,
           );
+
           const token = await this.tokensRepository.updateRefreshTokenById(
             refreshToken,
             tokenId,
           );
-          return { accessToken, refreshToken, tokenId: token.id };
+
+          const decodedAccessToken = jwt.decode(accessToken) as jwt.JwtPayload;
+          const accessTokenExpirationTime = decodedAccessToken?.exp;
+
+          const decodedRefreshToken = jwt.decode(
+            refreshToken,
+          ) as jwt.JwtPayload;
+          const refreshTokenExpirationTime = decodedRefreshToken?.exp;
+
+          return {
+            accessToken: {
+              value: accessToken,
+              expiresIn: accessTokenExpirationTime,
+            },
+            refreshToken: {
+              value: refreshToken,
+              expiresIn: refreshTokenExpirationTime,
+              tokenId: token.id,
+            },
+          };
         }
         throw new UnauthorizedException(
           'Token enviado e token da base de dados não coincidem',
