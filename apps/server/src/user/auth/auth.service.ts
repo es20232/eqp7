@@ -32,7 +32,7 @@ export class AuthService {
   }
 
   async signUp(
-    { name, email, password, username }: SignUpDto,
+    { name, email, password, username, bio }: SignUpDto,
     profilePicture?: Express.Multer.File,
   ) {
     const emailExists = await this.userRepository.findUserByEmail(email);
@@ -62,6 +62,7 @@ export class AuthService {
       password: hashedPassword,
       username,
       profilePicture: profilePicture?.filename,
+      bio,
     });
 
     return this.generateEmailToken(email, user.id);

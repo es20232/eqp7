@@ -39,7 +39,7 @@ export default function Account() {
               <Separator orientation="vertical" />
             </div>
             <Link href="/account/biografia">
-              <Button>Ver Biografia</Button>
+              <Button className="bg-blue-500">Ver Biografia</Button>
             </Link>
           </div>
         </div>

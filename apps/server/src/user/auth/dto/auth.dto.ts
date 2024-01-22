@@ -4,6 +4,7 @@ import {
   IsEmail,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsPositive,
   IsString,
   Matches,
@@ -59,6 +60,17 @@ export class SignUpDto {
 
   @ApiPropertyOptional({ type: 'string', format: 'binary' })
   profilePicture?: Express.Multer.File;
+
+  @ApiPropertyOptional({
+    example: 'Minha biografia',
+    maxLength: 200,
+    description: 'Biografia do usuário',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200, { message: 'A bio não pode ter mais de 200 caracteres' })
+  bio?: string;
+
 }
 
 export class SignInDto {
