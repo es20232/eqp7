@@ -4,6 +4,7 @@ import {
   Get,
   Headers,
   HttpStatus,
+  InternalServerErrorException,
   Param,
   ParseFilePipeBuilder,
   Post,
@@ -90,12 +91,21 @@ export class AuthController {
   @ApiHeader({
     name: 'Token-Id',
   })
+  @ApiHeader({
+    name: 'Authorization',
+  })
   @ApiOkResponse({
     schema: {
       example: {
-        accessToken: 'string',
-        refreshToken: 'string',
-        tokenId: 'number',
+        accessToken: {
+          value: 'string',
+          expiresIn: 'number',
+        },
+        refreshToken: {
+          value: 'string',
+          expiresIn: 'number',
+          tokenId: 'number',
+        },
       },
     },
   })
@@ -104,10 +114,14 @@ export class AuthController {
     @Headers('Token-Id') tokenId: string,
     @Headers('Authorization') token: string,
   ) {
-    const refreshToken = token.split('Bearer ')[1];
-    const numericTokenId = Number(tokenId);
+    try {
+      const refreshToken = token.split('Bearer ')[1];
+      const numericTokenId = Number(tokenId);
 
-    return this.authService.refresh(refreshToken, numericTokenId);
+      return this.authService.refresh(refreshToken, numericTokenId);
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
   }
 
   @Redirect(process.env.SUCCESSFUL_SIGN_UP_LINK, 302)
