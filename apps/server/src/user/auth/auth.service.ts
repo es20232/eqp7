@@ -103,6 +103,12 @@ export class AuthService {
         userExists.id,
       );
 
+      const decodedAccessToken = jwt.decode(accessToken) as jwt.JwtPayload;
+      const accessTokenExpirationTime = decodedAccessToken?.exp;
+
+      const decodedRefreshToken = jwt.decode(refreshToken) as jwt.JwtPayload;
+      const refreshTokenExpirationTime = decodedRefreshToken?.exp;
+
       const token = await this.tokensRepository.createRefreshToken({
         token: refreshToken,
         user: {
@@ -115,9 +121,15 @@ export class AuthService {
 
       return {
         user,
-        accessToken,
-        refreshToken,
-        tokenId: token.id,
+        accessToken: {
+          value: accessToken,
+          expiresIn: accessTokenExpirationTime,
+        },
+        refreshToken: {
+          value: refreshToken,
+          expiresIn: refreshTokenExpirationTime,
+          tokenId: token.id,
+        },
       };
     } catch (error) {
       throw new InternalServerErrorException(error);
