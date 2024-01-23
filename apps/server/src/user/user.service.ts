@@ -55,12 +55,14 @@ export class UserService {
       const unverifiedUsernameExists =
         await this.userRepository.findUnverifiedUserByUsername(username);
 
-      if (usernameExists || unverifiedUsernameExists) {
-        throw new ConflictException('Nome de usuário já cadastrado');
+      if (usernameExists?.id != userId) {
+        if (usernameExists || unverifiedUsernameExists) {
+          throw new ConflictException('Nome de usuário já cadastrado');
+        }
       }
     }
     try {
-      const updatedUser = await this.userRepository.updateUser(
+      await this.userRepository.updateUser(
         { name, username, profilePicture: profilePicture?.filename },
         userId,
       );
@@ -68,6 +70,8 @@ export class UserService {
         user.name,
         user.id,
       );
+
+      const updatedUser = await this.getProfile(userId);
 
       const updatedUserResponse = new UserResponseDto(updatedUser);
 
