@@ -46,5 +46,5 @@ export async function login({ credentials, callbackUrl = "/" }: LoginParams) {
     httpOnly: true,
   });
 
-  return redirect('/')
+  return redirect(callbackUrl);
 }

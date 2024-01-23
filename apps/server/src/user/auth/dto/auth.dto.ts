@@ -70,7 +70,6 @@ export class SignUpDto {
   @IsString()
   @MaxLength(200, { message: 'A bio não pode ter mais de 200 caracteres' })
   bio?: string;
-
 }
 
 export class SignInDto {

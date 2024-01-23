@@ -9,6 +9,7 @@ export function AuthHeader({ children }: { children: React.ReactNode }) {
         width={40}
         height={40}
         className="mb-6"
+        quality={100}
       />
       {children}
     </header>
