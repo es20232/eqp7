@@ -205,10 +205,7 @@ export class AuthService {
     const token = await this.tokensRepository.findEmailToken(emailToken);
 
     if (!token) {
-      throw new UnauthorizedException({
-        message: 'Token inválido',
-        cause: 'invalidToken',
-      });
+      return { url: process.env.FAILURE_SIGN_UP_LINK + '?error=invalidToken' };
     }
 
     try {
@@ -219,7 +216,9 @@ export class AuthService {
       );
 
       if (!user) {
-        throw new NotFoundException('Usuário não encontrado no sistema');
+        return {
+          url: process.env.FAILURE_SIGN_UP_LINK + '?error=userNotFound',
+        };
       }
 
       await this.userRepository.runTransaction(async () => {
@@ -235,18 +234,17 @@ export class AuthService {
       });
     } catch (error) {
       if (error instanceof jwt.TokenExpiredError) {
-        throw new UnauthorizedException({
-          message:
-            'Tempo de expiração alcançado. Clique no botão abaixo para que um novo link seja enviado para seu email.',
-          cause: 'expiratedToken',
-        });
+        return {
+          url: process.env.FAILURE_SIGN_UP_LINK + '?error=expiretedToken',
+        };
       } else if (error instanceof jwt.JsonWebTokenError) {
-        throw new UnauthorizedException({
-          message: 'Token com má-formação',
-          cause: 'malformedToken',
-        });
+        return {
+          url: process.env.FAILURE_SIGN_UP_LINK + '?error=malformedToken',
+        };
       } else {
-        throw new InternalServerErrorException(error);
+        return {
+          url: process.env.FAILURE_SIGN_UP_LINK + `?error=${error}`,
+        };
       }
     }
   }

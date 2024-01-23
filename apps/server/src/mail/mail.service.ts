@@ -1,5 +1,7 @@
-import { Injectable, InternalServerErrorException, ServiceUnavailableException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import * as fs from 'fs/promises';
 import { google } from 'googleapis';
+import * as handlebars from 'handlebars';
 import * as nodemailer from 'nodemailer';
 
 @Injectable()
@@ -44,7 +46,10 @@ export class MailService {
         },
       });
     } catch (error) {
-      throw new InternalServerErrorException('Erro ao estabelecer conexao com o servidor de email', error);
+      throw new InternalServerErrorException(
+        'Erro ao estabelecer conexao com o servidor de email',
+        error,
+      );
     }
   }
 
@@ -52,12 +57,21 @@ export class MailService {
     try {
       const resetLink = process.env.RESET_PASSWORD_LINK + `/${resetToken}`;
       const subject = 'Redefinir Senha';
-      const emailBody = `Você solicitou a redefinição de sua senha. Clique no link a seguir para prosseguir:\n${resetLink}\nCaso você não tenha solicitado a redefinição, desconsidere este email.`;
+      const replacements = {
+        resetLink,
+      };
 
-      return this.sendEmail(email, subject, emailBody);
+      const templatePath = 'src/mail/templates/reset-password-template.html';
+
+      return this.sendEmail(email, subject, templatePath, replacements);
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
+  }
+
+  private async readHTMLFile(filePath: string): Promise<string> {
+    const html = await fs.readFile(filePath, { encoding: 'utf-8' });
+    return html;
   }
 
   async sendEmailVerifyUserEmail(email: string, emailToken: string) {
@@ -65,20 +79,34 @@ export class MailService {
       const confirmeEmailLink =
         process.env.CONFIRM_EMAIL_LINK + `/${emailToken}`;
       const subject = 'Confirmação de cadastro';
-      const emailBody = `Clique no link a seguir para que possámos verificar o seu email e concluir seu cadastro:\n${confirmeEmailLink}\nCaso você não tenha feito cadastro no nosso sistema, desconsidere este email.`;
 
-      return this.sendEmail(email, subject, emailBody);
+      const replacements = {
+        confirmeEmailLink,
+      };
+
+      const templatePath = 'src/mail/templates/confirm-email-template.html';
+
+      return this.sendEmail(email, subject, templatePath, replacements);
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
   }
 
-  private async sendEmail(email: string, subject: string, emailBody: string) {
+  private async sendEmail(
+    email: string,
+    subject: string,
+    templatePath: string,
+    replacements: Record<string, string>,
+  ) {
     if (!process.env.EMAIL_USER) {
       throw new Error('EMAIL_USER is not defined in environment variables');
     }
 
     try {
+      const html = await this.readHTMLFile(templatePath);
+      const template = handlebars.compile(html);
+      const htmlToSend = template(replacements);
+
       await this.transporter.sendMail({
         from: {
           name: 'nao-responda',
@@ -86,13 +114,20 @@ export class MailService {
         },
         to: email,
         subject,
-        text: emailBody,
+        html: htmlToSend,
+        attachments: [
+          {
+            filename: 'logo.png',
+            path: 'src/mail/templates/assets/logo.png',
+            cid: 'vslogo',
+          },
+        ],
       });
     } catch (error) {
       throw new InternalServerErrorException({
         erro: error,
         message: 'Erro ao enviar email ao usuário',
-      })
+      });
     }
   }
 }
