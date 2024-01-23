@@ -8,7 +8,13 @@ import { AuthMainContent } from '@/components/auth/main-content'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
-export default function Login() {
+type LoginProps = {
+  searchParams: {
+    callbackUrl?: string
+  }
+}
+
+export default function Login({ searchParams: { callbackUrl } }: LoginProps) {
   return (
     <div>
       <AuthHeader>
@@ -19,7 +25,7 @@ export default function Login() {
         </AuthHeaderDescription>
       </AuthHeader>
       <AuthMainContent>
-        <LoginForm />
+        <LoginForm callbackUrl={callbackUrl} />
         <div className="mt-6 flex w-full items-center justify-center">
           <Link href="/auth/forgot-password">
             <Button variant="link" className="">

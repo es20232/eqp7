@@ -62,6 +62,7 @@ export class UserController {
     )
     profilePicture?: Express.Multer.File,
   ) {
+    console.log(body.bio);
     return this.userService.updateUser(body, userId, profilePicture);
   }
 }

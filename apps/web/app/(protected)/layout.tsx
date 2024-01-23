@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useUser } from '../hooks/useUser'
+import { useUser } from '../../hooks/useUser'
 import { getInitials } from '@/lib/utils'
 
 export default function ProtectedLayout({
@@ -31,6 +31,7 @@ export default function ProtectedLayout({
           <Link href="/account">
             <div className="flex items-center gap-4">
               <Avatar>
+                {user?.profilePictureUrl && <AvatarImage src={user?.profilePictureUrl} />}
                 <AvatarFallback>{getInitials(user?.name)}</AvatarFallback>
               </Avatar>
               <span className="hidden text-sm font-medium md:block">
