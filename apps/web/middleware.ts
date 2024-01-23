@@ -4,15 +4,15 @@ import { RefreshToken } from "./app/types/tokens";
 import { NextURL } from "next/dist/server/web/next-url";
 import { API_URL } from "./lib/env";
 
-export const runtime = 'experimental-edge'
+export const runtime = "experimental-edge";
 
 const authRoutes = [
   "/auth/login",
   "/auth/register",
   "/auth/verify-email",
   "/auth/verify-email/success",
+  "/auth/verify-email/success",
 ];
-
 
 function encodeCallbackUrl(url: NextURL) {
   let callbackUrl = url.pathname;

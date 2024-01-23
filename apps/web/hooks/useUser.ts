@@ -1,18 +1,19 @@
-import { cookies } from 'next/headers'
+import { cookies } from "next/headers";
 
 type User = {
-  name: string
-  username: string
-  email: string
-  photo: string
-}
+  name: string;
+  username: string;
+  email: string;
+  profilePicture: string;
+  bio: string;
+};
 
 export function useUser(): User | undefined {
-  const userCookie = cookies().get('user')?.value
+  const userCookie = cookies().get("user")?.value;
 
-  if (!userCookie) return undefined
+  if (!userCookie) return undefined;
 
-  const user = JSON.parse(userCookie)
+  const user = JSON.parse(userCookie);
 
-  return user
+  return user;
 }
