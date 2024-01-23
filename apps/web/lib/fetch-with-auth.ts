@@ -1,19 +1,24 @@
-import { RequestInit } from 'next/dist/server/web/spec-extension/request'
-import { cookies } from 'next/headers'
+"use server";
+
+import { AccessToken} from "@/app/types/tokens";
+import { RequestInit } from "next/dist/server/web/spec-extension/request";
+import { cookies } from "next/headers";
+import { API_URL } from "./env";
 
 export async function fetchWithAuth(
   url: string,
   options?: RequestInit,
 ): Promise<Response> {
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL
-  const accessToken = cookies().get('acess_token')?.value
-
-  return fetch(`${apiUrl}${url}`, {
+  const accessTokenCookie = cookies().get("access_token")?.value;
+  const accessToken: AccessToken =
+    accessTokenCookie && JSON.parse(accessTokenCookie);
+  
+  return fetch(`${API_URL}${url}`, {
     ...options,
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...options?.headers,
-      ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+      ...(accessToken && { Authorization: `Bearer ${accessToken.value}` }),
     },
-  })
+  });
 }

@@ -1,52 +1,50 @@
-'use server'
+"use server";
 
-import { redirect } from 'next/navigation'
-import { cookies } from 'next/headers'
+import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
+import process from "process";
 
-type Credentials = {
-  username: string
-  password: string
-}
+type LoginParams = {
+  credentials: { username: string; password: string };
+  callbackUrl?: string;
+};
 
-export async function login(credentials: Credentials) {
+export async function login({ credentials, callbackUrl = "/" }: LoginParams) {
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/auth/sign-in`,
     {
-      method: 'POST',
+      method: "POST",
       body: JSON.stringify({
         user: credentials.username,
         password: credentials.password,
       }),
       headers: {
-        'Content-type': 'application/json',
+        "Content-type": "application/json",
       },
     },
-  )
+  );
 
-  const data = await response.json()
+  const data = await response.json();
 
   if (!response.ok) {
-    const unverifiedUser = data.cause === 'unverifiedUser'
+    const unverifiedUser = data.cause === "unverifiedUser";
 
-    if (unverifiedUser) redirect('/auth/verify-email')
+    if (unverifiedUser) return redirect("/auth/verify-email");
 
     return {
       error: data.message,
-    }
+    };
   }
 
-  const cookieStore = cookies()
+  const cookieStore = cookies();
 
-  cookieStore.set('user', JSON.stringify(data.user))
-  cookieStore.set('access_token', data.accessToken, {
+  cookieStore.set("user", JSON.stringify(data.user));
+  cookieStore.set("access_token", JSON.stringify(data.accessToken), {
     httpOnly: true,
-  })
-  cookieStore.set('refresh_token', data.accessToken, {
+  });
+  cookieStore.set("refresh_token", JSON.stringify(data.refreshToken), {
     httpOnly: true,
-  })
-  cookieStore.set('token_id', data.accessToken, {
-    httpOnly: true,
-  })
+  });
 
-  redirect('/')
+  return redirect('/')
 }
