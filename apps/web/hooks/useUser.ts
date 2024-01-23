@@ -1,6 +1,7 @@
+import { User } from "lucide-react";
 import { cookies } from "next/headers";
 
-type User = {
+export type User = {
   name: string;
   username: string;
   email: string;

@@ -9,24 +9,31 @@ import { useState } from 'react'
 import { FormError } from '../form-error'
 import { Spinner } from '../ui/spinner'
 import { editUser } from '@/actions/user'
+import { User } from '@/hooks/useUser'
 
-type FormValues = { name: string; username: string; bio: string }
+type FormValues = { name: string; username: string; bio: string; }
 
-export function Redef() {
+type RedefProps = {
+  user?: User
+}
+
+export function Redef({ user }: RedefProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
   const form = useForm<FormValues>({
     defaultValues: {
-      name: '',
-      username: '',
-      bio: '',
+      name: user?.name,
+      username: user?.username,
+      bio: user?.bio,
     },
   })
 
   async function onSubmit(values: FormValues) {
     setIsLoading(true)
+
     try {
+
       const resp = await editUser(values)
       setErrorMessage(resp.error)
     } catch (error) {

@@ -1,9 +1,11 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Redef } from '@/components/account/edit'
+import { Redef } from '@/components/account/redef'
 import { ArrowLeft } from 'lucide-react'
+import { useUser } from '@/hooks/useUser'
 
 export default function Edit() {
+  const user = useUser()
   return (
     <div className="mx-auto flex max-w-2xl justify-between py-5 flex-col">
       <Link href="/account" className='mb-8'>
@@ -11,7 +13,7 @@ export default function Edit() {
       </Link>
 
       <h3 className="mb-4 text-2xl font-bold">Editar Perfil</h3>
-      <Redef />
+      <Redef user={user} />
     </div>
   )
 }
