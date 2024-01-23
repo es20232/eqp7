@@ -2,8 +2,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
+import { useUser } from '@/hooks/useUser'
 
 export default function Account() {
+  const user = useUser()
   return (
     <div>
       <div className="m h-[30vh] w-full bg-blue-100" />
@@ -17,7 +19,7 @@ export default function Account() {
             height={180}
           />
           <div className="flex flex-col gap-6">
-            <h2 className="text-2xl font-medium">Luís Felipe Moral</h2>
+            <h2 className="text-2xl font-medium">{user?.name}</h2>
             <div className="flex gap-10">
               <div className="flex flex-col items-center justify-center">
                 <span className="text-sn uppercasa text-muted-foreground">

@@ -42,7 +42,7 @@ export class UserService {
   }
 
   async updateUser(
-    { name, username }: UpdateUserDto,
+    { name, username, bio }: UpdateUserDto,
     userId: number,
     profilePicture?: Express.Multer.File,
   ) {
@@ -61,7 +61,7 @@ export class UserService {
     }
     try {
       const updatedUser = await this.userRepository.updateUser(
-        { name, username, profilePicture: profilePicture?.filename },
+        { name, username, bio, profilePicture: profilePicture?.filename },
         userId,
       );
       const { accessToken, refreshToken } = await this.generateTokens(

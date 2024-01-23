@@ -22,6 +22,9 @@ export class UserResponseDto {
   profilePicture?: string | null;
 
   @ApiProperty()
+  bio?: string | null;
+
+  @ApiProperty()
   profilePictureUrl?: string | null;
 
   constructor(partial: Partial<UserResponseDto>) {
