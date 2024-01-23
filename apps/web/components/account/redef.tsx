@@ -11,7 +11,7 @@ import { Spinner } from '../ui/spinner'
 import { editUser } from '@/actions/user'
 import { User } from '@/hooks/useUser'
 
-type FormValues = { name: string; username: string; bio: string; }
+type FormValues = { name: string; username: string; bio: string; profilePicture?: File }
 
 type RedefProps = {
   user?: User
@@ -26,6 +26,7 @@ export function Redef({ user }: RedefProps) {
       name: user?.name,
       username: user?.username,
       bio: user?.bio,
+      profilePicture: undefined
     },
   })
 
@@ -33,8 +34,14 @@ export function Redef({ user }: RedefProps) {
     setIsLoading(true)
 
     try {
+      const formData = new FormData()
 
-      const resp = await editUser(values)
+      formData.append('name', values.name)
+      formData.append('username', values.username)
+      formData.append('bio', values.bio)
+      formData.append('profilePicture', values.profilePicture)
+
+      const resp = await editUser(formData)
       setErrorMessage(resp.error)
     } catch (error) {
       console.log(error)
@@ -46,6 +53,23 @@ export function Redef({ user }: RedefProps) {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-8">
         <FormError message={errorMessage} />
+        <FormField
+          name="profilePicture"
+          control={form.control}
+          render={({ field: { value, onChange, ...field } }) => (
+            <FormItem>
+              <Label>Nome</Label>
+              <Input {...field}
+                value={value?.fileName}
+                onChange={(event) => {
+                  onChange(event.target.files[0]);
+                }}
+                type='file'
+              />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           name="name"
           control={form.control}

@@ -31,7 +31,7 @@ export default function ProtectedLayout({
           <Link href="/account">
             <div className="flex items-center gap-4">
               <Avatar>
-                {user?.profilePicture && <AvatarImage src={user?.profilePicture} />}
+                {user?.profilePictureUrl && <AvatarImage src={user?.profilePictureUrl} />}
                 <AvatarFallback>{getInitials(user?.name)}</AvatarFallback>
               </Avatar>
               <span className="hidden text-sm font-medium md:block">

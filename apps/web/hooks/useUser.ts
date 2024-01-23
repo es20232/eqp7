@@ -5,7 +5,7 @@ export type User = {
   name: string;
   username: string;
   email: string;
-  profilePicture: string;
+  profilePictureUrl: string;
   bio: string;
 };
 

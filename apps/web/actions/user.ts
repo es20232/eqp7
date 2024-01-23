@@ -4,20 +4,15 @@ import { fetchWithAuth } from "@/lib/fetch-with-auth";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-type EditUserParams = {
-  name: string;
-  username: string;
-  bio: string;
-  profilePicture: string;
-};
-
-export async function editUser(params: EditUserParams) {
-  console.log(params);
-
-  const response = await fetchWithAuth("/user/update", {
-    method: "PUT",
-    body: JSON.stringify(params),
-  });
+export async function editUser(params: FormData) {
+  const response = await fetchWithAuth(
+    "/user/update",
+    {
+      method: "PUT",
+      body: params,
+    },
+    "form-data",
+  );
 
   const data = await response.json();
 

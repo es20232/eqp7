@@ -14,11 +14,12 @@ export default function Account() {
       <div className="mx-auto flex max-w-7xl justify-between px-4 py-5 sm:flex-row sm:gap-6 sm:px-0">
         <div className="flex gap-6">
           <Image
-            src={user?.profilePicture ?? '/avatar.jpg'}
+            src={user?.profilePictureUrl ?? '/avatar.jpg'}
             alt="Foto de perfil"
-            className="ring-white w-48 aspect-square -translate-y-1/2 rounded-full object-cover ring-4 bg-white"
+            className="ring-white w-48 aspect-square -translate-y-1/2 rounded-full object-center ring-4 bg-white"
             width={180}
             height={180}
+            unoptimized={true}
           />
           <div className="flex flex-col gap-6">
             <h2 className="text-2xl font-medium">{user?.name}</h2>
