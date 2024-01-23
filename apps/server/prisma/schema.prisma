@@ -19,7 +19,8 @@ model User {
   password           String
   profilePicture     String?
   resetPasswordToken ResetPasswordToken?
-  refreshToken       RefreshToken[]
+  refreshToken       RefreshToken[]  
+  bio                String?           
 }
 
 model UnverifiedUser {
@@ -30,6 +31,7 @@ model UnverifiedUser {
   password          String
   profilePicture    String?
   confirmEmailToken ConfirmEmailToken?
+  bio                String?
 }
 
 model ResetPasswordToken {

@@ -48,7 +48,7 @@ export class UserController {
   @ApiConsumes('multipart/form-data')
   @UseGuards(AuthGuard)
   @ApiBearerAuth('jwt')
-  @Put('/update-user')
+  @Put('/update')
   updateUser(
     @Body() body: UpdateUserDto,
     @User('id') userId: number,
