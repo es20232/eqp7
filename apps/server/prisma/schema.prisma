@@ -19,8 +19,48 @@ model User {
   password           String
   profilePicture     String?
   resetPasswordToken ResetPasswordToken?
-  refreshToken       RefreshToken[]  
-  bio                String?           
+  refreshToken       RefreshToken[]
+  bio                String?
+  postComments       PostComments[]
+  postLikes          PostLikes[]
+  userPosts          UserPost[]
+}
+
+model UserPost {
+  id           Int            @id @default(autoincrement())
+  userId       Int
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  description  String
+  date         DateTime       @db.Date
+  postImages   PostImages[]
+  postComments PostComments[]
+  postLikes    PostLikes[]
+}
+
+model PostImages {
+  id       Int      @id @default(autoincrement())
+  postId   Int
+  post     UserPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  imageUrl String
+}
+
+model PostComments {
+  id      Int      @id @default(autoincrement())
+  postId  Int
+  post    UserPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  comment String
+  date    DateTime @db.Date
+  userId  Int
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PostLikes {
+  id     Int      @id @default(autoincrement())
+  postId Int
+  post   UserPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  date   DateTime @db.Date
+  userId Int
+  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model UnverifiedUser {
@@ -31,7 +71,7 @@ model UnverifiedUser {
   password          String
   profilePicture    String?
   confirmEmailToken ConfirmEmailToken?
-  bio                String?
+  bio               String?
 }
 
 model ResetPasswordToken {
