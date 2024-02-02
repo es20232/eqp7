@@ -31,7 +31,7 @@ model UserPost {
   userId       Int
   user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   description  String
-  date         DateTime       @db.Date
+  date         DateTime       @default(now())
   postImages   PostImages[]
   postComments PostComments[]
   postLikes    PostLikes[]
@@ -49,7 +49,7 @@ model PostComments {
   postId  Int
   post    UserPost @relation(fields: [postId], references: [id], onDelete: Cascade)
   comment String
-  date    DateTime @db.Date
+  date    DateTime @default(now())
   userId  Int
   user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -58,7 +58,7 @@ model PostLikes {
   id     Int      @id @default(autoincrement())
   postId Int
   post   UserPost @relation(fields: [postId], references: [id], onDelete: Cascade)
-  date   DateTime @db.Date
+  date   DateTime @default(now())
   userId Int
   user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
