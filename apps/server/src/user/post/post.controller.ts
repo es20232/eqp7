@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Get,
   HttpStatus,
+  Param,
   ParseFilePipeBuilder,
   Post,
   UploadedFiles,
@@ -19,6 +21,7 @@ import { PostService } from './post.service';
 @Controller('post')
 export class PostController {
   constructor(private readonly postService: PostService) {}
+
   @UseInterceptors(
     FilesInterceptor('images', 10, {
       storage: diskStorage({
@@ -53,5 +56,10 @@ export class PostController {
     images: Express.Multer.File[],
   ) {
     return this.postService.createPost(body, images, userId);
+  }
+
+  @Get(':id')
+  getPost(@Param('id') id: number) {
+    return this.postService.getPost(id);
   }
 }

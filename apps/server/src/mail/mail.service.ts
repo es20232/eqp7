@@ -46,10 +46,7 @@ export class MailService {
         },
       });
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Erro ao estabelecer conexao com o servidor de email',
-        error,
-      );
+      console.log(error);
     }
   }
 

@@ -38,10 +38,10 @@ model UserPost {
 }
 
 model PostImages {
-  id       Int      @id @default(autoincrement())
-  postId   Int
-  post     UserPost @relation(fields: [postId], references: [id], onDelete: Cascade)
-  imageUrl String
+  id     Int      @id @default(autoincrement())
+  postId Int
+  post   UserPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  image  String
 }
 
 model PostComments {

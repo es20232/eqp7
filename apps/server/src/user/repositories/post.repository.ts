@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma } from '@prisma/client';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class PostRepository {
@@ -13,11 +13,12 @@ export class PostRepository {
       });
     } catch (error) {
       throw new InternalServerErrorException(
-        'Erro na base de dados ao criar usuário',
+        'Erro na base de dados ao criar publicação',
         error,
       );
     }
   }
+
   async postImages(postId: number, profilePictures: Express.Multer.File[]) {
     try {
       return Promise.all(
@@ -25,14 +26,43 @@ export class PostRepository {
           this.prismaService.postImages.create({
             data: {
               postId: postId,
-              imageUrl: picture.filename, // substitua 'path' pelo campo correto do objeto 'picture'
+              image: picture.filename,
             },
           }),
         ),
       );
     } catch (error) {
       throw new InternalServerErrorException(
-        'Erro na base de dados ao criar imagens do post',
+        'Erro na base de dados ao criar imagens da publicação',
+        error,
+      );
+    }
+  }
+
+  async getPost(id: number) {
+    try {
+      return this.prismaService.userPost.findUnique({
+        where: {
+          id,
+        },
+        include: {
+          postComments: {
+            include: {
+              user: true,
+            },
+          },
+          postImages: true,
+          postLikes: {
+            include: {
+              user: true,
+            },
+          },
+          user: true,
+        },
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Erro interno ao buscar publicação',
         error,
       );
     }
