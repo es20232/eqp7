@@ -21,12 +21,18 @@ export class PostService {
     await this.postRepository.postImages(postUser.id, postImages);
   }
 
-  async getPost(id: number) {
+  async getPost(id: number, cursor?: number, take?: number) {
     const post = await this.postRepository.getPost(id);
 
     if (!post) {
       throw new NotFoundException('Publicação não encontrada');
     }
+
+    const postComments = await this.postRepository.getPostComments(
+      id,
+      cursor,
+      take,
+    );
 
     const url = `${process.env.APP_URL}/uploads`;
 
@@ -38,8 +44,15 @@ export class PostService {
     const postWithUrl = {
       ...post,
       postImages: imagesWithUrls,
+      postComments,
     };
 
     return new PostResponseDto(postWithUrl);
+  }
+
+  async getUserPosts(userId: number) {
+    const posts = await this.postRepository.getUserPosts(userId);
+
+    return posts;
   }
 }

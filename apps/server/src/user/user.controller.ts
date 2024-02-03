@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpStatus,
+  Param,
   ParseFilePipeBuilder,
   Put,
   UploadedFile,
@@ -15,18 +16,27 @@ import { diskStorage } from 'multer';
 import { User } from 'src/decorators/user.decorator';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { UpdateUserDto } from './dto/user.dto';
+import { PostService } from './post/post.service';
 import { UserService } from './user.service';
 
 @ApiTags('user')
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly postService: PostService,
+  ) {}
 
   @UseGuards(AuthGuard)
   @ApiBearerAuth('jwt')
   @Get('/profile')
   getProfile(@User('id') userId: number) {
     return this.userService.getProfile(userId);
+  }
+
+  @Get(':id/posts')
+  getUserPosts(@Param('id') id: number) {
+    return this.postService.getUserPosts(id);
   }
 
   @UseInterceptors(

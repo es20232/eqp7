@@ -1,6 +1,8 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import paginator from 'src/utils/paginator';
+import { PostCommentsResponseDto } from '../post/dto/post.dto';
 
 @Injectable()
 export class PostRepository {
@@ -66,5 +68,35 @@ export class PostRepository {
         error,
       );
     }
+  }
+
+  async getPostComments(postId: number, cursor?: number, take?: number) {
+    try {
+      return paginator<PostCommentsResponseDto>(
+        {
+          model: this.prismaService.postComments,
+          include: {
+            user: true,
+          },
+          take,
+          cursor,
+        },
+        { where: { postId } },
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Erro interno ao buscar comentários do post',
+      );
+    }
+  }
+
+  async getUserPosts(userId: number) {
+    try {
+      return this.prismaService.userPost.findMany({
+        where: {
+          userId,
+        },
+      });
+    } catch (error) {}
   }
 }

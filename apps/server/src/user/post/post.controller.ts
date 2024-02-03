@@ -6,6 +6,7 @@ import {
   Param,
   ParseFilePipeBuilder,
   Post,
+  Query,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
@@ -14,6 +15,7 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
 import { User } from 'src/decorators/user.decorator';
+import { PaginationParamsDto } from 'src/dtos/paginator.dto';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { CreatePostDto } from './dto/post.dto';
 import { PostService } from './post.service';
@@ -59,7 +61,14 @@ export class PostController {
   }
 
   @Get(':id')
-  getPost(@Param('id') id: number) {
-    return this.postService.getPost(id);
+  getPost(
+    @Param('id') id: number,
+    @Query()
+    { take, cursor }: PaginationParamsDto,
+  ) {
+    return this.postService.getPost(id, cursor, take);
   }
+
+  @Post(':id/comment')
+  createComment() {}
 }
