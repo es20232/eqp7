@@ -12,7 +12,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
 import { User } from 'src/decorators/user.decorator';
 import { PaginationParamsDto } from 'src/dtos/paginator.dto';
@@ -20,6 +20,7 @@ import { AuthGuard } from 'src/guards/auth.guard';
 import { CreatePostDto } from './dto/post.dto';
 import { PostService } from './post.service';
 
+@ApiTags('post')
 @Controller('post')
 export class PostController {
   constructor(private readonly postService: PostService) {}
@@ -61,12 +62,34 @@ export class PostController {
   }
 
   @Get(':id')
-  getPost(
+  getPost(@Param('id') id: number) {
+    return this.postService.getPost(id);
+  }
+
+  @Get()
+  getAllPosts(
+    @Query()
+    { cursor, take }: PaginationParamsDto,
+  ) {
+    return this.postService.getAllPosts(cursor, take);
+  }
+
+  @Get(':id/likes')
+  getPostLikes(
     @Param('id') id: number,
     @Query()
-    { take, cursor }: PaginationParamsDto,
+    { cursor, take }: PaginationParamsDto,
   ) {
-    return this.postService.getPost(id, cursor, take);
+    return this.postService.getPostLikes(id, cursor, take);
+  }
+
+  @Get(':id/comments')
+  getPostComments(
+    @Param('id') id: number,
+    @Query()
+    { cursor, take }: PaginationParamsDto,
+  ) {
+    return this.postService.getPostComments(id, cursor, take);
   }
 
   @Post(':id/comment')

@@ -2,7 +2,11 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import paginator from 'src/utils/paginator';
-import { PostCommentsResponseDto } from '../post/dto/post.dto';
+import {
+  PostCommentsResponseDto,
+  PostLikesResponseDto,
+  PostResponseDto,
+} from '../post/dto/post.dto';
 
 @Injectable()
 export class PostRepository {
@@ -15,7 +19,7 @@ export class PostRepository {
       });
     } catch (error) {
       throw new InternalServerErrorException(
-        'Erro na base de dados ao criar publicação',
+        'Erro na base de dados ao criar post',
         error,
       );
     }
@@ -35,7 +39,7 @@ export class PostRepository {
       );
     } catch (error) {
       throw new InternalServerErrorException(
-        'Erro na base de dados ao criar imagens da publicação',
+        'Erro na base de dados ao criar imagens da post',
         error,
       );
     }
@@ -48,23 +52,13 @@ export class PostRepository {
           id,
         },
         include: {
-          postComments: {
-            include: {
-              user: true,
-            },
-          },
           postImages: true,
-          postLikes: {
-            include: {
-              user: true,
-            },
-          },
           user: true,
         },
       });
     } catch (error) {
       throw new InternalServerErrorException(
-        'Erro interno ao buscar publicação',
+        'Erro interno ao buscar post',
         error,
       );
     }
@@ -90,6 +84,26 @@ export class PostRepository {
     }
   }
 
+  async getPostLikes(postId: number, cursor?: number, take?: number) {
+    try {
+      return paginator<PostLikesResponseDto>(
+        {
+          model: this.prismaService.postLikes,
+          include: {
+            user: true,
+          },
+          take,
+          cursor,
+        },
+        { where: { postId } },
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Erro interno ao buscar likes do post',
+      );
+    }
+  }
+
   async getUserPosts(userId: number) {
     try {
       return this.prismaService.userPost.findMany({
@@ -97,6 +111,54 @@ export class PostRepository {
           userId,
         },
       });
-    } catch (error) {}
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Erro interno ao buscar posts do usuário',
+      );
+    }
+  }
+
+  async getALLposts(cursor?: number, take?: number) {
+    try {
+      return paginator<PostResponseDto>({
+        model: this.prismaService.userPost,
+        cursor,
+        take,
+        include: {
+          postImages: true,
+          user: true,
+        },
+      });
+    } catch (error) {
+      throw new InternalServerErrorException('Erro interno ao buscar posts');
+    }
+  }
+
+  async countPostLikes(postId: number) {
+    try {
+      return this.prismaService.postLikes.count({
+        where: {
+          postId,
+        },
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Erro interno ao contar likes do post',
+      );
+    }
+  }
+
+  async countPostComments(postId: number) {
+    try {
+      return this.prismaService.postComments.count({
+        where: {
+          postId,
+        },
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Erro interno ao contar comentários do post',
+      );
+    }
   }
 }

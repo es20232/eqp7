@@ -2,7 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Transform, Type } from 'class-transformer';
 import { IsString } from 'class-validator';
 import { format } from 'date-fns';
-import { PaginationResponseDto } from 'src/dtos/paginator.dto';
 import { UserResponseDto } from 'src/user/dto/user.dto';
 
 export class CreatePostDto {
@@ -84,7 +83,7 @@ export class PostResponseDto {
   @Exclude()
   userId: number;
 
-  @Exclude()
+  @ApiProperty()
   id: number;
 
   @ApiProperty()
@@ -102,15 +101,11 @@ export class PostResponseDto {
   @Type(() => PostImagesResponseDto)
   postImages: PostImagesResponseDto[];
 
-  @ApiProperty({
-    type: PaginationResponseDto,
-  })
-  @Type(() => PostCommentsResponseDto)
-  postComments: PaginationResponseDto<PostCommentsResponseDto>;
+  @ApiProperty()
+  totalLikes: number;
 
   @ApiProperty()
-  @Type(() => PostLikesResponseDto)
-  postLikes: PostLikesResponseDto[];
+  totalComments: number;
 
   @ApiProperty()
   @Type(() => UserResponseDto)
