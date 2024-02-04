@@ -18,6 +18,7 @@ type FormValues = z.infer<typeof accountSchema>
 export function RegisterForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
 
   const router = useRouter()
 
@@ -96,12 +97,21 @@ export function RegisterForm() {
           )}
         />
         <FormField
-          control={form.control}
           name="password"
+          control={form.control}
           render={({ field }) => (
             <FormItem>
               <Label>Senha</Label>
-              <Input {...field} />
+              <Input {...field} type={showPassword ? 'text' : 'password'} />
+              <Button
+                className="-translate-x-2"
+                variant="ghost"
+                size="sm"
+                type="button"
+                onClick={() => setShowPassword((prevState) => !prevState)}
+              >
+                {showPassword ? 'Esconder' : 'Mostrar'} senha
+              </Button>
               <FormMessage />
             </FormItem>
           )}

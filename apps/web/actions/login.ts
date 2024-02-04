@@ -1,50 +1,44 @@
-"use server";
+'use server'
 
-import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
-import process from "process";
+import { redirect } from 'next/navigation'
+import { getServerSession } from '@/lib/auth/getServerSession'
+import { fetchClient } from '@/lib/fetch-client'
+import { ActionState } from '@/app/types/actions'
 
 type LoginParams = {
-  credentials: { username: string; password: string };
-  callbackUrl?: string;
-};
+  credentials: { username: string; password: string }
+  callbackUrl?: string
+}
 
-export async function login({ credentials, callbackUrl = "/" }: LoginParams) {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/auth/sign-in`,
-    {
-      method: "POST",
-      body: JSON.stringify({
-        user: credentials.username,
-        password: credentials.password,
-      }),
-      headers: {
-        "Content-type": "application/json",
-      },
+export async function login({
+  credentials,
+  callbackUrl = '/',
+}: LoginParams): Promise<ActionState<never>> {
+  const response = await fetchClient('/auth/sign-in', {
+    method: 'POST',
+    body: JSON.stringify({
+      user: credentials.username,
+      password: credentials.password,
+    }),
+    headers: {
+      'Content-type': 'application/json',
     },
-  );
+  })
 
-  const data = await response.json();
+  const data = await response.json()
 
   if (!response.ok) {
-    const unverifiedUser = data.cause === "unverifiedUser";
+    const unverifiedUser = data.cause === 'unverifiedUser'
 
-    if (unverifiedUser) return redirect("/auth/verify-email");
+    if (unverifiedUser) return redirect('/auth/verify-email')
 
     return {
       error: data.message,
-    };
+    }
   }
 
-  const cookieStore = cookies();
+  const { update } = await getServerSession()
+  update(data)
 
-  cookieStore.set("user", JSON.stringify(data.user));
-  cookieStore.set("access_token", JSON.stringify(data.accessToken), {
-    httpOnly: true,
-  });
-  cookieStore.set("refresh_token", JSON.stringify(data.refreshToken), {
-    httpOnly: true,
-  });
-
-  return redirect(callbackUrl);
+  return redirect(callbackUrl)
 }

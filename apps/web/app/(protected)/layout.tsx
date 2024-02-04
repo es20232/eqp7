@@ -4,15 +4,17 @@ import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useUser } from '../../hooks/useUser'
 import { getInitials } from '@/lib/utils'
+import { getServerSession } from '@/lib/auth/getServerSession'
 
-export default function ProtectedLayout({
+export default async function ProtectedLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const user = useUser()
+  const {
+    session: { user },
+  } = await getServerSession()
   return (
     <div className="min-h-[100svh] w-full ">
       <header className=" border-b px-4 py-2">
@@ -31,7 +33,9 @@ export default function ProtectedLayout({
           <Link href="/account">
             <div className="flex items-center gap-4">
               <Avatar>
-                {user?.profilePictureUrl && <AvatarImage src={user?.profilePictureUrl} />}
+                {user?.profilePictureUrl && (
+                  <AvatarImage src={user?.profilePictureUrl} />
+                )}
                 <AvatarFallback>{getInitials(user?.name)}</AvatarFallback>
               </Avatar>
               <span className="hidden text-sm font-medium md:block">

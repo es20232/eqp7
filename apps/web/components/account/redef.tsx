@@ -10,29 +10,47 @@ import { FormError } from '../form-error'
 import { Spinner } from '../ui/spinner'
 import { editUser } from '@/actions/user'
 import { User } from '@/hooks/useUser'
+import { useAction } from '@/hooks/useAction'
+import { useRouter } from 'next/navigation'
+import { useToast } from '../ui/use-toast'
 
-type FormValues = { name: string; username: string; bio: string; profilePicture?: File }
+type FormValues = {
+  name: string
+  username: string
+  bio: string
+  profilePicture?: File
+}
 
 type RedefProps = {
   user?: User
 }
 
 export function Redef({ user }: RedefProps) {
-  const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
+  const router = useRouter()
+  const { toast } = useToast()
+
+  const { execute, isLoading } = useAction(editUser, {
+    onError: (error) => setErrorMessage(error),
+    onSuccess: (data) => {
+      toast({
+        title: 'Dados atualizados',
+        description: data,
+      })
+      router.replace('/account')
+    },
+  })
 
   const form = useForm<FormValues>({
     defaultValues: {
       name: user?.name,
       username: user?.username,
-      bio: user?.bio,
-      profilePicture: undefined
+      bio: user?.bio ?? '',
+      profilePicture: undefined,
     },
   })
 
   async function onSubmit(values: FormValues) {
-    setIsLoading(true)
-
     try {
       const formData = new FormData()
 
@@ -41,13 +59,10 @@ export function Redef({ user }: RedefProps) {
       formData.append('bio', values.bio)
       formData.append('profilePicture', values.profilePicture)
 
-      const resp = await editUser(formData)
-      setErrorMessage(resp.error)
+      await execute(formData)
     } catch (error) {
-      console.log(error)
       setErrorMessage('Ocorreu um erro inesperado')
     }
-    setIsLoading(false)
   }
   return (
     <Form {...form}>
@@ -59,12 +74,13 @@ export function Redef({ user }: RedefProps) {
           render={({ field: { value, onChange, ...field } }) => (
             <FormItem>
               <Label>Nome</Label>
-              <Input {...field}
+              <Input
+                {...field}
                 value={value?.fileName}
                 onChange={(event) => {
-                  onChange(event.target.files[0]);
+                  onChange(event.target.files[0])
                 }}
-                type='file'
+                type="file"
               />
               <FormMessage />
             </FormItem>
@@ -103,7 +119,7 @@ export function Redef({ user }: RedefProps) {
             </FormItem>
           )}
         />
-        <Button className=" " size="lg" disabled={isLoading} type="submit">
+        <Button size="lg" disabled={isLoading} type="submit">
           {isLoading && <Spinner size="sm" className="mr-2" />}
           Redefinir
         </Button>

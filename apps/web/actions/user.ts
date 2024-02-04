@@ -1,27 +1,26 @@
-"use server";
+'use server'
 
-import { fetchWithAuth } from "@/lib/fetch-with-auth";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { ActionState } from '@/app/types/actions'
+import { getServerSession } from '@/lib/auth/getServerSession'
+import { fetchWithAuth } from '@/lib/fetch-with-auth'
 
-export async function editUser(params: FormData) {
-  const response = await fetchWithAuth(
-    "/user/update",
-    {
-      method: "PUT",
-      body: params,
-    },
-    "form-data",
-  );
+export async function editUser(params: FormData): Promise<ActionState<string>> {
+  const response = await fetchWithAuth('/user/update', {
+    method: 'PUT',
+    body: params,
+  })
 
-  const data = await response.json();
+  const data = await response.json()
 
-  if (response.ok) {
-    cookies().set("user", JSON.stringify(data.updatedUserResponse));
-    redirect("/account");
-  }
+  if (!response.ok)
+    return {
+      error: data.message,
+    }
+
+  const { update } = await getServerSession()
+  update({ user: data.updatedUserResponse })
 
   return {
-    error: data.message,
-  };
+    data: 'Dados do perfil atualizados com sucesso!',
+  }
 }
