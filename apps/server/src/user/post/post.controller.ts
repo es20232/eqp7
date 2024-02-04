@@ -17,7 +17,7 @@ import { diskStorage } from 'multer';
 import { User } from 'src/decorators/user.decorator';
 import { PaginationParamsDto } from 'src/dtos/paginator.dto';
 import { AuthGuard } from 'src/guards/auth.guard';
-import { CreatePostDto } from './dto/post.dto';
+import { CreateCommentDto, CreatePostDto } from './dto/post.dto';
 import { PostService } from './post.service';
 
 @ApiTags('post')
@@ -92,6 +92,21 @@ export class PostController {
     return this.postService.getPostComments(id, cursor, take);
   }
 
+  @ApiBearerAuth('jwt')
+  @UseGuards(AuthGuard)
   @Post(':id/comment')
-  createComment() {}
+  createComment(
+    @Body() body: CreateCommentDto,
+    @User('id') userId: number,
+    @Param('id') id: number,
+  ) {
+    return this.postService.createComment(id, userId, body);
+  }
+
+  @ApiBearerAuth('jwt')
+  @UseGuards(AuthGuard)
+  @Post(':id/like')
+  createLike(@User('id') userId: number, @Param('id') id: number) {
+    return this.postService.createLike(id, userId);
+  }
 }
