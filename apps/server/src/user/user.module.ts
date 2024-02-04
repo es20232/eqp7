@@ -9,10 +9,11 @@ import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { PostController } from './post/post.controller';
 import { PostService } from './post/post.service';
+import { PostRepository } from './repositories/post.repository';
 
 @Module({
   imports: [PrismaModule, MailModule],
   controllers: [AuthController, UserController, PostController],
-  providers: [AuthService, UserRepository, TokensRepository, UserService, PostService],
+  providers: [AuthService, UserRepository, TokensRepository, PostRepository, UserService, PostService],
 })
 export class UserModule {}

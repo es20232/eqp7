@@ -29,6 +29,7 @@ async function bootstrap() {
     .setVersion('v1')
     .addTag('auth')
     .addTag('user')
+    .addTag('post')
     .addBearerAuth(
       {
         type: 'http',
