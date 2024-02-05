@@ -14,7 +14,9 @@ type LoginProps = {
   }
 }
 
-export default function Login({ searchParams: { callbackUrl } }: LoginProps) {
+export default async function Login({
+  searchParams: { callbackUrl },
+}: LoginProps) {
   return (
     <div>
       <AuthHeader>

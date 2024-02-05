@@ -20,7 +20,8 @@ export default function VerifyEmail() {
 
       <AuthMainContent>
         <p className="">
-          Não conseguimos validar seu email. Por favor, volte para a página de login e tente novamente em alguns instantes.
+          Não conseguimos validar seu email. Por favor, volte para a página de
+          login e tente novamente em alguns instantes.
         </p>
         <Link href="/auth/login" className="mt-6 self-start">
           <Button className="-translate-x-4" variant="link">

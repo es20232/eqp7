@@ -1,110 +1,111 @@
-import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
-import { RefreshToken } from "./app/types/tokens";
-import { NextURL } from "next/dist/server/web/next-url";
-import { API_URL } from "./lib/env";
+import { cookies } from 'next/headers'
+import { NextRequest, NextResponse } from 'next/server'
+import { RefreshToken } from './types/auth'
+import { NextURL } from 'next/dist/server/web/next-url'
+import { fetchClient } from './lib/fetch-client'
 
-export const runtime = "experimental-edge";
+export const runtime = 'experimental-edge'
 
 const authRoutes = [
-  "/auth/login",
-  "/auth/register",
-  "/auth/verify-email",
-  "/auth/verify-email/success",
-  "/auth/verify-email/success",
-];
+  '/auth/login',
+  '/auth/register',
+  '/auth/verify-email',
+  '/auth/verify-email/success',
+]
 
 function encodeCallbackUrl(url: NextURL) {
-  let callbackUrl = url.pathname;
+  let callbackUrl = url.pathname
   if (url.search) {
-    callbackUrl += url.search;
+    callbackUrl += url.search
   }
 
-  return encodeURIComponent(callbackUrl);
+  return encodeURIComponent(callbackUrl)
 }
 
 function redirectToLogin(url: NextURL) {
-  const encodedCallbackUrl = encodeCallbackUrl(url);
+  const encodedCallbackUrl = encodeCallbackUrl(url)
 
   return Response.redirect(
     new URL(`/auth/login?callbackUrl=${encodedCallbackUrl}`, url),
-  );
+  )
 }
 
-export async function middleware(req: NextRequest, res: NextResponse) {
-  const { nextUrl } = req;
-  const isLoggedIn = cookies().has("access_token");
+export async function middleware(req: NextRequest) {
+  const { nextUrl } = req
+  const isLoggedIn = cookies().has('access_token')
 
-  const isAuthRoute = authRoutes.includes(nextUrl.pathname);
+  const isAuthRoute = authRoutes.includes(nextUrl.pathname)
 
   if (isAuthRoute) {
     if (isLoggedIn) {
-      return Response.redirect(new URL("/", nextUrl));
+      return Response.redirect(new URL('/', nextUrl))
     }
-    return null;
+    return null
   }
 
-  if (!isLoggedIn) return redirectToLogin(nextUrl);
+  if (!isLoggedIn) return redirectToLogin(nextUrl)
 
-  const accessTokenCookie = req.cookies.get("access_token")?.value;
-  const accessToken = accessTokenCookie && JSON.parse(accessTokenCookie);
+  const accessTokenCookie = req.cookies.get('access_token')?.value
+  const accessToken = accessTokenCookie && JSON.parse(accessTokenCookie)
 
   if (Date.now() / 1000 < accessToken.expiresIn) {
-    return null;
+    return null
   }
 
-  const refreshTokenCookie = req.cookies.get("refresh_token")?.value;
+  const refreshTokenCookie = req.cookies.get('refresh_token')?.value
   const refreshToken: RefreshToken =
-    refreshTokenCookie && JSON.parse(refreshTokenCookie);
+    refreshTokenCookie && JSON.parse(refreshTokenCookie)
 
   if (Date.now() / 1000 > refreshToken.expiresIn) {
-    const callbackUrl = encodeCallbackUrl(nextUrl);
+    const callbackUrl = encodeCallbackUrl(nextUrl)
     const response = NextResponse.redirect(
       new URL(`/auth/login?callbackUrl=${callbackUrl}`, nextUrl),
-    );
+    )
 
-    response.cookies.delete("user");
-    response.cookies.delete("access_token");
-    response.cookies.delete("refresh_token");
+    response.cookies.delete('user')
+    response.cookies.delete('access_token')
+    response.cookies.delete('refresh_token')
 
-    return response;
+    return response
   }
 
-  const tokensResponse = await fetch(`${API_URL}/auth/refresh`, {
-    method: "POST",
+  const tokensResponse = await fetchClient('/auth/refresh', {
+    method: 'POST',
     headers: {
-      "Token-Id": String(refreshToken.tokenId),
+      'Token-Id': String(refreshToken.tokenId),
       Authorization: `Bearer ${refreshToken.value}`,
     },
-  });
+  })
 
   if (!tokensResponse.ok) {
-    const callbackUrl = encodeCallbackUrl(nextUrl);
+    const callbackUrl = encodeCallbackUrl(nextUrl)
     const response = NextResponse.redirect(
       new URL(`/auth/login?callbackUrl=${callbackUrl}`, nextUrl),
-    );
+    )
 
-    response.cookies.delete("user");
-    response.cookies.delete("access_token");
-    response.cookies.delete("refresh_token");
+    response.cookies.delete('user')
+    response.cookies.delete('access_token')
+    response.cookies.delete('refresh_token')
 
-    return response;
+    return response
   }
 
-  const tokens = await tokensResponse.json();
+  const tokens = await tokensResponse.json()
 
-  const response = NextResponse.next();
+  console.log(tokens)
 
-  response.cookies.set("access_token", JSON.stringify(tokens.accessToken), {
+  const response = NextResponse.redirect(nextUrl)
+
+  response.cookies.set('access_token', JSON.stringify(tokens.accessToken), {
     httpOnly: true,
-  });
-  response.cookies.set("refresh_token", JSON.stringify(tokens.refreshToken), {
+  })
+  response.cookies.set('refresh_token', JSON.stringify(tokens.refreshToken), {
     httpOnly: true,
-  });
+  })
 
-  return response;
+  return response
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
-};
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+}
