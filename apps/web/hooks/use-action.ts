@@ -1,4 +1,4 @@
-import { ActionState } from '@/app/types/actions'
+import { ActionState } from '@/types/actions'
 import { useState, useCallback } from 'react'
 
 type Action<TInput, TOutput> = (data: TInput) => Promise<ActionState<TOutput>>

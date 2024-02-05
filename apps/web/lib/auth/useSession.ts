@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import Cookies from 'js-cookie'
-import { User } from '@/app/types/auth'
+import { User } from '@/types/auth'
 
 type ReturnType = {
   user?: User
@@ -15,7 +15,7 @@ export function useSession(): ReturnType {
     if (cookie) {
       setUser(JSON.parse(cookie))
     }
-  }, [])
+  }, [Cookies.get('user')])
 
   const update = (newUser: User) => {
     Cookies.set('user', JSON.stringify(newUser))

@@ -1,6 +1,6 @@
 'use server'
 
-import { AccessToken, RefreshToken, User } from '@/app/types/auth'
+import { AccessToken, RefreshToken, User } from '@/types/auth'
 import { cookies } from 'next/headers'
 
 export type ServerSession = {

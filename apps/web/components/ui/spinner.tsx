@@ -2,19 +2,19 @@ import { cn } from '@/lib/utils'
 import { VariantProps, cva } from 'class-variance-authority'
 
 const spinnerVariants = cva(
-  'inline-block  animate-spin duration-700 rounded-full border-2 border-white/40 border-t-white  ',
+  'inline-block  animate-spin duration-700 rounded-full',
   {
     variants: {
       size: {
-        sm: 'h-4 w-4',
-        default: 'h-5 w-5',
-        md: 'h-6 w-6',
-        lg: 'h-8 w-8',
-        xl: 'h-10 w-10',
+        sm: 'h-4 w-4 border-2',
+        default: 'h-5 w-5 border-2',
+        md: 'h-6 w-6 border-2',
+        lg: 'h-8 w-8 border-[3px]',
+        xl: 'h-10 w-10 border-[3px]',
       },
       color: {
-        default: 'text-primary',
-        white: 'text-white',
+        primary: 'border-primary/40 border-t-primary',
+        default: 'border-white/40 border-t-white',
       },
     },
     defaultVariants: {

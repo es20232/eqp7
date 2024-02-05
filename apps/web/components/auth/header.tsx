@@ -1,14 +1,13 @@
 import Image from 'next/image'
+import Logo from '@/public/logo.svg'
 
 export function AuthHeader({ children }: { children: React.ReactNode }) {
   return (
     <header className="flex flex-col items-center justify-center gap-2 bg-gray-50 px-5 py-8 sm:px-10">
       <Image
-        src="/logo.png"
+        src={Logo}
         alt="Visual Social logo"
-        width={40}
-        height={40}
-        className="mb-6"
+        className="mb-6 size-12"
         quality={100}
       />
       {children}

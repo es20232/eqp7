@@ -9,16 +9,15 @@ import { useState } from 'react'
 import { FormError } from '../form-error'
 import { Spinner } from '../ui/spinner'
 import { editUser } from '@/actions/user'
-import { User } from '@/hooks/useUser'
-import { useAction } from '@/hooks/useAction'
+import { useAction } from '@/hooks/use-action'
 import { useRouter } from 'next/navigation'
 import { useToast } from '../ui/use-toast'
+import { User } from '@/types/auth'
 
 type FormValues = {
   name: string
   username: string
   bio: string
-  profilePicture?: File
 }
 
 type RedefProps = {
@@ -46,46 +45,20 @@ export function Redef({ user }: RedefProps) {
       name: user?.name,
       username: user?.username,
       bio: user?.bio ?? '',
-      profilePicture: undefined,
     },
   })
 
   async function onSubmit(values: FormValues) {
     try {
-      const formData = new FormData()
-
-      formData.append('name', values.name)
-      formData.append('username', values.username)
-      formData.append('bio', values.bio)
-      formData.append('profilePicture', values.profilePicture)
-
-      await execute(formData)
+      await execute(values)
     } catch (error) {
       setErrorMessage('Ocorreu um erro inesperado')
     }
   }
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-8">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-6">
         <FormError message={errorMessage} />
-        <FormField
-          name="profilePicture"
-          control={form.control}
-          render={({ field: { value, onChange, ...field } }) => (
-            <FormItem>
-              <Label>Nome</Label>
-              <Input
-                {...field}
-                value={value?.fileName}
-                onChange={(event) => {
-                  onChange(event.target.files[0])
-                }}
-                type="file"
-              />
-              <FormMessage />
-            </FormItem>
-          )}
-        />
         <FormField
           name="name"
           control={form.control}

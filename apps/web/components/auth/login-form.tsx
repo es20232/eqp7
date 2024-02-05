@@ -12,8 +12,7 @@ import { useState } from 'react'
 import { FormError } from '../form-error'
 import { Spinner } from '../ui/spinner'
 import { login } from '@/actions/login'
-import { useAction } from '@/hooks/useAction'
-import error from 'next/error'
+import { useAction } from '@/hooks/use-action'
 
 type FormValues = z.infer<typeof loginSchema>
 

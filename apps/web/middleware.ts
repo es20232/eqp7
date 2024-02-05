@@ -1,8 +1,7 @@
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
-import { RefreshToken } from './app/types/auth'
+import { RefreshToken } from './types/auth'
 import { NextURL } from 'next/dist/server/web/next-url'
-import { API_URL } from './lib/env'
 import { fetchClient } from './lib/fetch-client'
 
 export const runtime = 'experimental-edge'

@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation'
 import { getServerSession } from '@/lib/auth/getServerSession'
 import { fetchClient } from '@/lib/fetch-client'
-import { ActionState } from '@/app/types/actions'
+import { ActionState } from '@/types/actions'
 
 type LoginParams = {
   credentials: { username: string; password: string }

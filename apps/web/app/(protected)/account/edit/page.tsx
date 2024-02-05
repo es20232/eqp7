@@ -9,15 +9,15 @@ export default async function Edit() {
     session: { user },
   } = await getServerSession()
   return (
-    <div className="mx-auto flex max-w-2xl flex-col justify-between py-5">
-      <Link href="/account" className="mb-8">
+    <div className="mx-auto flex max-w-2xl flex-col justify-between p-5">
+      <Link href="/account" className="mb-4">
         <Button variant="ghost" className="-translate-x-3">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Voltar
         </Button>
       </Link>
 
-      <h3 className="mb-4 text-2xl font-bold">Editar Perfil</h3>
+      <h3 className="mb-4 text-xl font-bold md:text-2xl">Editar Perfil</h3>
       <Redef user={user} />
     </div>
   )
