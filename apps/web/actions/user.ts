@@ -1,8 +1,8 @@
 'use server'
 
-import { ActionState } from '@/types/actions'
 import { getServerSession } from '@/lib/auth/getServerSession'
 import { fetchWithAuth } from '@/lib/fetch-with-auth'
+import { ActionState } from '@/types/actions'
 
 export async function editUser(params: FormData): Promise<ActionState<string>> {
   const response = await fetchWithAuth('/user/update', {
@@ -16,8 +16,6 @@ export async function editUser(params: FormData): Promise<ActionState<string>> {
     return {
       error: data.message,
     }
-
-  console.log(data)
 
   const { update } = await getServerSession()
   update({ user: data.updatedUserResponse })

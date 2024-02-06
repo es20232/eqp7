@@ -1,18 +1,18 @@
 'use client'
 
-import { Form, FormField, FormItem, FormMessage } from '@/components/ui/form'
-import { useForm } from 'react-hook-form'
-import { Input } from '../ui/input'
-import { Button } from '../ui/button'
-import { Label } from '../ui/label'
-import { useState } from 'react'
-import { FormError } from '../form-error'
-import { Spinner } from '../ui/spinner'
 import { editUser } from '@/actions/user'
+import { Form, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { useAction } from '@/hooks/use-action'
-import { useRouter } from 'next/navigation'
-import { useToast } from '../ui/use-toast'
 import { User } from '@/types/auth'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { FormError } from '../form-error'
+import { Button } from '../ui/button'
+import { Input } from '../ui/input'
+import { Label } from '../ui/label'
+import { Spinner } from '../ui/spinner'
+import { useToast } from '../ui/use-toast'
 
 type FormValues = {
   name: string
@@ -50,7 +50,11 @@ export function Redef({ user }: RedefProps) {
 
   async function onSubmit(values: FormValues) {
     try {
-      await execute(values)
+      const formData = new FormData()
+      formData.append('name', values.name)
+      formData.append('username', values.username)
+      formData.append('bio', values.bio)
+      await execute(formData)
     } catch (error) {
       setErrorMessage('Ocorreu um erro inesperado')
     }
