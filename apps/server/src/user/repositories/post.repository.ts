@@ -8,6 +8,8 @@ import {
   PostResponseDto,
 } from '../post/dto/post.dto';
 
+type TransactionFunction<T> = (prisma: PrismaService) => Promise<T>;
+
 @Injectable()
 export class PostRepository {
   constructor(private readonly prismaService: PrismaService) {}
@@ -80,6 +82,7 @@ export class PostRepository {
     } catch (error) {
       throw new InternalServerErrorException(
         'Erro interno ao buscar comentários do post',
+        error,
       );
     }
   }
@@ -100,6 +103,7 @@ export class PostRepository {
     } catch (error) {
       throw new InternalServerErrorException(
         'Erro interno ao buscar likes do post',
+        error,
       );
     }
   }
@@ -114,6 +118,7 @@ export class PostRepository {
     } catch (error) {
       throw new InternalServerErrorException(
         'Erro interno ao buscar posts do usuário',
+        error,
       );
     }
   }
@@ -130,7 +135,10 @@ export class PostRepository {
         },
       });
     } catch (error) {
-      throw new InternalServerErrorException('Erro interno ao buscar posts');
+      throw new InternalServerErrorException(
+        'Erro interno ao buscar posts',
+        error,
+      );
     }
   }
 
@@ -144,6 +152,7 @@ export class PostRepository {
     } catch (error) {
       throw new InternalServerErrorException(
         'Erro interno ao contar likes do post',
+        error,
       );
     }
   }
@@ -158,6 +167,102 @@ export class PostRepository {
     } catch (error) {
       throw new InternalServerErrorException(
         'Erro interno ao contar comentários do post',
+        error,
+      );
+    }
+  }
+
+  async createComment(data: Prisma.PostCommentsCreateInput) {
+    try {
+      return this.prismaService.postComments.create({
+        data,
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Erro interno ao criar novo comentário',
+        error,
+      );
+    }
+  }
+
+  async createLike(data: Prisma.PostLikesCreateInput) {
+    try {
+      return this.prismaService.postLikes.create({
+        data,
+      });
+    } catch (error) {
+      throw new InternalServerErrorException('Erro interno ao dar like', error);
+    }
+  }
+
+  async findPostById(id: number) {
+    try {
+      return this.prismaService.userPost.findUnique({
+        where: {
+          id,
+        },
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Erro interno ao buscar post',
+        error,
+      );
+    }
+  }
+
+  async findLikeByUserId(userId: number, postId: number) {
+    try {
+      return this.prismaService.postLikes.findFirst({
+        where: {
+          AND: [
+            {
+              userId,
+            },
+            {
+              postId,
+            },
+          ],
+        },
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Erro interno ao buscar like',
+        error,
+      );
+    }
+  }
+
+  async findCommentByUserId(userId: number, postId: number) {
+    try {
+      return this.prismaService.postComments.findFirst({
+        where: {
+          AND: [
+            {
+              userId,
+            },
+            {
+              postId,
+            },
+          ],
+        },
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Erro interno ao buscar comentário',
+        error,
+      );
+    }
+  }
+
+  async runTransaction<T>(
+    transactionFunction: TransactionFunction<T>,
+  ): Promise<T> {
+    try {
+      return this.prismaService.$transaction(transactionFunction);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Erro ao rodar transação na base de dados',
+        error,
       );
     }
   }

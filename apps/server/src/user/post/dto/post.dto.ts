@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Transform, Type } from 'class-transformer';
-import { IsString } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 import { format } from 'date-fns';
 import { UserResponseDto } from 'src/user/dto/user.dto';
 
@@ -114,4 +114,11 @@ export class PostResponseDto {
   constructor(partial: Partial<PostResponseDto>) {
     Object.assign(this, partial);
   }
+}
+
+export class CreateCommentDto {
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  comment: string;
 }

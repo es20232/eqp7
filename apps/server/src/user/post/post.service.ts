@@ -1,6 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { PostRepository } from '../repositories/post.repository';
 import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { PostRepository } from '../repositories/post.repository';
+import { UserRepository } from '../repositories/user.repository';
+import {
+  CreateCommentDto,
   CreatePostDto,
   PostCommentsResponseDto,
   PostLikesResponseDto,
@@ -9,21 +15,30 @@ import {
 
 @Injectable()
 export class PostService {
-  constructor(private readonly postRepository: PostRepository) {}
+  constructor(
+    private readonly postRepository: PostRepository,
+    private readonly userRepository: UserRepository,
+  ) {}
   async createPost(
     { description }: CreatePostDto,
     postImages: Express.Multer.File[],
     userId: number,
   ) {
-    const postUser = await this.postRepository.createPost({
-      user: {
-        connect: {
-          id: userId,
+    const result = await this.postRepository.runTransaction(async () => {
+      const postUser = await this.postRepository.createPost({
+        user: {
+          connect: {
+            id: userId,
+          },
         },
-      },
-      description,
+        description,
+      });
+      await this.postRepository.postImages(postUser.id, postImages);
+
+      return postUser;
     });
-    await this.postRepository.postImages(postUser.id, postImages);
+
+    return { id: result.id };
   }
 
   async getPost(id: number) {
@@ -102,5 +117,86 @@ export class PostService {
     });
 
     return { data: transformedData, meta: posts.meta };
+  }
+
+  async createComment(postId: number, userId: number, body: CreateCommentDto) {
+    const userExists = await this.userRepository.findUserById(userId);
+
+    if (!userExists) {
+      throw new NotFoundException('Usuário não encontrado');
+    }
+
+    const postExists = await this.postRepository.findPostById(postId);
+
+    if (!postExists) {
+      throw new NotFoundException('Post não encontrado');
+    }
+
+    const userHasCommented = await this.postRepository.findCommentByUserId(
+      userId,
+      postId,
+    );
+
+    if (userHasCommented) {
+      throw new ConflictException(
+        'Não é possível fazer mais de um comentário por postagem',
+      );
+    }
+
+    const comment = await this.postRepository.createComment({
+      user: {
+        connect: {
+          id: userId,
+        },
+      },
+      post: {
+        connect: {
+          id: postId,
+        },
+      },
+      comment: body.comment,
+    });
+
+    return { id: comment.id };
+  }
+
+  async createLike(postId: number, userId: number) {
+    const userExists = await this.userRepository.findUserById(userId);
+
+    if (!userExists) {
+      throw new NotFoundException('Usuário não encontrado');
+    }
+
+    const postExists = await this.postRepository.findPostById(postId);
+
+    if (!postExists) {
+      throw new NotFoundException('Post não encontrado');
+    }
+
+    const userHasLiked = await this.postRepository.findLikeByUserId(
+      userId,
+      postId,
+    );
+
+    if (userHasLiked) {
+      throw new ConflictException(
+        'Não é possível dar mais de um like por postagem',
+      );
+    }
+
+    const like = await this.postRepository.createLike({
+      user: {
+        connect: {
+          id: userId,
+        },
+      },
+      post: {
+        connect: {
+          id: postId,
+        },
+      },
+    });
+
+    return { id: like.id };
   }
 }

@@ -4,26 +4,23 @@ import { Input } from '@/components/ui/input'
 import { Search } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useUser } from '../../hooks/useUser'
 import { getInitials } from '@/lib/utils'
+import { getServerSession } from '@/lib/auth/getServerSession'
+import Logo from '@/public/logo.svg'
 
-export default function ProtectedLayout({
+export default async function ProtectedLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const user = useUser()
+  const {
+    session: { user },
+  } = await getServerSession()
   return (
     <div className="min-h-[100svh] w-full ">
       <header className=" border-b px-4 py-2">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-6">
-          <Image
-            src="/logo.png"
-            width={32}
-            height={32}
-            alt="VisualSocial logo"
-            quality={100}
-          />
+          <Image src={Logo} alt="VisualSocial logo" className="size-8" />
           <div className="relative w-full max-w-md">
             <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input placeholder="Pesquisar" className="pl-8" />
@@ -31,7 +28,9 @@ export default function ProtectedLayout({
           <Link href="/account">
             <div className="flex items-center gap-4">
               <Avatar>
-                {user?.profilePictureUrl && <AvatarImage src={user?.profilePictureUrl} />}
+                {user?.profilePictureUrl && (
+                  <AvatarImage src={user?.profilePictureUrl} />
+                )}
                 <AvatarFallback>{getInitials(user?.name)}</AvatarFallback>
               </Avatar>
               <span className="hidden text-sm font-medium md:block">
