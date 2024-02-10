@@ -48,9 +48,14 @@ export function Redef({ user }: RedefProps) {
     },
   })
 
-  async function onSubmit(values: FormValues) {
+  async function onSubmit({ bio, name, username }: FormValues) {
     try {
-      await execute(values)
+      const formData = new FormData()
+      formData.append('name', name)
+      formData.append('bio', bio)
+      formData.append('username', username)
+
+      await execute(formData)
     } catch (error) {
       setErrorMessage('Ocorreu um erro inesperado')
     }

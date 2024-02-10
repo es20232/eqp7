@@ -17,8 +17,6 @@ export async function editUser(params: FormData): Promise<ActionState<string>> {
       error: data.message,
     }
 
-  console.log(data)
-
   const { update } = await getServerSession()
   update({ user: data.updatedUserResponse })
 
