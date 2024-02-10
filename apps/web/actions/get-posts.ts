@@ -33,8 +33,6 @@ export async function getPosts({
 
   const nextCursor = hasMore ? newCursor : null
 
-  console.log(newCursor)
-
   return {
     data: {
       posts,
