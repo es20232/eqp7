@@ -36,10 +36,21 @@ const mockCommentReturnData = {
   userId: 1,
 };
 
+const mockLikeReturnData = {
+  id: 1,
+  postId: 1,
+  date: new Date(),
+  userId: 1,
+};
+
+const mockCreateCommentData: CreateCommentDto = {
+  comment: 'Test Comment',
+};
+
 describe('PostService', () => {
   let service: PostService;
   let postRepository: PostRepository;
-  // let prismaService: PrismaService;
+  let userRepository: UserRepository;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -57,10 +68,12 @@ describe('PostService', () => {
         {
           provide: PostRepository,
           useValue: {
-            findPostById: jest.fn().mockReturnValue(mockPostReturnData),
+            findPostById: jest.fn().mockResolvedValue(mockPostReturnData),
             findCommentByUserId: jest.fn().mockReturnValue(null),
+            findLikeByUserId: jest.fn().mockReturnValue(null),
             getPostComments: jest.fn(),
             createComment: jest.fn(),
+            createLike: jest.fn(),
           },
         },
       ],
@@ -71,7 +84,7 @@ describe('PostService', () => {
 
     service = module.get<PostService>(PostService);
     postRepository = module.get<PostRepository>(PostRepository);
-    // prismaService = module.get<PrismaService>(PrismaService);
+    userRepository = module.get<UserRepository>(UserRepository);
   });
 
   describe('getPostComments', () => {
@@ -120,16 +133,29 @@ describe('PostService', () => {
   });
 
   describe('createComment', () => {
-    const mockCreateCommentData: CreateCommentDto = {
-      comment: 'Test Comment',
-    };
-
-    it('should creat a comment', async () => {
+    it('should create a comment', async () => {
       jest
         .spyOn(postRepository, 'createComment')
         .mockResolvedValue(mockCommentReturnData);
 
       const result = await service.createComment(1, 1, mockCreateCommentData);
+
+      expect(postRepository.findPostById).toHaveBeenCalledTimes(1);
+      expect(userRepository.findUserById).toHaveBeenCalledTimes(1);
+      expect(postRepository.createComment).toHaveBeenCalledTimes(1);
+      expect(postRepository.createComment).toHaveBeenCalledWith({
+        ...mockCreateCommentData,
+        user: {
+          connect: {
+            id: 1,
+          },
+        },
+        post: {
+          connect: {
+            id: 1,
+          },
+        },
+      });
 
       expect(result).toEqual({ id: mockCommentReturnData.id });
     });
@@ -172,6 +198,142 @@ describe('PostService', () => {
           'Erro interno ao criar novo comentário',
         ),
       );
+    });
+  });
+
+  describe('createLike', () => {
+    it('should create a like', async () => {
+      jest
+        .spyOn(postRepository, 'createLike')
+        .mockResolvedValue(mockLikeReturnData);
+
+      const result = await service.createLike(1, 1);
+
+      expect(postRepository.findPostById).toHaveBeenCalledTimes(1);
+      expect(userRepository.findUserById).toHaveBeenCalledTimes(1);
+      expect(postRepository.createLike).toHaveBeenCalledTimes(1);
+      expect(postRepository.createLike).toHaveBeenCalledWith({
+        user: {
+          connect: {
+            id: 1,
+          },
+        },
+        post: {
+          connect: {
+            id: 1,
+          },
+        },
+      });
+      expect(result).toEqual({ id: mockLikeReturnData.id });
+    });
+
+    it('should throw an exception if user has already liked', async () => {
+      jest
+        .spyOn(postRepository, 'createLike')
+        .mockRejectedValue(
+          new ConflictException(
+            'Não é possível dar mais de um like por postagem',
+          ),
+        );
+
+      jest
+        .spyOn(postRepository, 'findLikeByUserId')
+        .mockResolvedValue(mockLikeReturnData);
+
+      await expect(service.createLike(1, 1)).rejects.toThrow(
+        new ConflictException(
+          'Não é possível dar mais de um like por postagem',
+        ),
+      );
+    });
+
+    it('should throw an exception if an error occurs', async () => {
+      jest
+        .spyOn(postRepository, 'createLike')
+        .mockRejectedValue(
+          new InternalServerErrorException('Erro interno ao dar like'),
+        );
+
+      await expect(
+        postRepository.createLike({
+          user: {
+            connect: {
+              id: 1,
+            },
+          },
+          post: {
+            connect: {
+              id: 1,
+            },
+          },
+        }),
+      ).rejects.toThrow(
+        new InternalServerErrorException('Erro interno ao dar like'),
+      );
+    });
+  });
+});
+
+describe('PostRepository', () => {
+  let postRepository: PostRepository;
+  let prismaService: PrismaService;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        PostRepository,
+        {
+          provide: PrismaService,
+          useValue: {
+            postComments: {
+              findUnique: jest.fn(),
+              create: jest.fn(),
+            },
+          },
+        },
+        {
+          provide: PostRepository,
+          useValue: {
+            findPostById: jest.fn().mockReturnValue(mockPostReturnData),
+            findCommentByUserId: jest.fn().mockReturnValue(null),
+            getPostComments: jest.fn(),
+            createComment: jest.fn(),
+          },
+        },
+      ],
+    })
+      .overrideProvider(PrismaService)
+      .useValue(mockDeep<PrismaClient>())
+      .compile();
+
+    postRepository = module.get<PostRepository>(PostRepository);
+    prismaService = module.get<PrismaService>(PrismaService);
+  });
+
+  describe('createComment', () => {
+    it('should call create method of the PrismaService', async () => {
+      jest
+        .spyOn(prismaService.postComments, 'create')
+        .mockResolvedValueOnce(mockCommentReturnData);
+
+      const result = await postRepository.createComment({
+        ...mockCreateCommentData,
+        user: {
+          connect: {
+            id: 1,
+          },
+        },
+        post: {
+          connect: {
+            id: 1,
+          },
+        },
+      });
+
+      console.log(result);
+
+      // expect(prismaService.postComments.create).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(mockCommentReturnData);
     });
   });
 });
