@@ -1,13 +1,17 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Exclude, Transform, Type } from 'class-transformer';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 import { format } from 'date-fns';
 import { UserResponseDto } from 'src/user/dto/user.dto';
 
 export class CreatePostDto {
-  @ApiProperty()
+  @ApiPropertyOptional()
   @IsString()
-  description: string;
+  @IsOptional()
+  @MaxLength(2000, {
+    message: 'A descricao não pode ter mais de 2000 caracteres',
+  })
+  description?: string;
 
   @ApiProperty({ type: 'array', items: { type: 'string', format: 'binary' } })
   images: Express.Multer.File[];
@@ -64,6 +68,30 @@ export class PostLikesResponseDto {
   }
 }
 
+export class PostDeslikesResponseDto {
+  @Exclude()
+  postId: number;
+
+  @Exclude()
+  userId: number;
+
+  @Transform(({ value }) => {
+    if (value instanceof Date) {
+      return format(value, 'dd/MM/yyyy');
+    }
+  })
+  @ApiProperty()
+  date: Date;
+
+  @ApiProperty()
+  @Type(() => UserResponseDto)
+  user: UserResponseDto;
+
+  constructor(partial: Partial<PostDeslikesResponseDto>) {
+    Object.assign(this, partial);
+  }
+}
+
 export class PostImagesResponseDto {
   @Exclude()
   postId: number;
@@ -87,7 +115,7 @@ export class PostResponseDto {
   id: number;
 
   @ApiProperty()
-  description: string;
+  description?: string | null;
 
   @Transform(({ value }) => {
     if (value instanceof Date) {
@@ -103,6 +131,9 @@ export class PostResponseDto {
 
   @ApiProperty()
   totalLikes: number;
+
+  @ApiProperty()
+  totalDeslikes: number;
 
   @ApiProperty()
   totalComments: number;

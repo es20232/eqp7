@@ -102,6 +102,15 @@ export class PostController {
     return this.postService.getPostLikes(id, cursor, take);
   }
 
+  @Get(':id/deslikes')
+  getPostDeslikes(
+    @Param('id') id: number,
+    @Query()
+    { cursor, take }: PaginationParamsDto,
+  ) {
+    return this.postService.getPostDeslikes(id, cursor, take);
+  }
+
   @Get(':id/comments')
   getPostComments(
     @Param('id') id: number,
@@ -127,5 +136,12 @@ export class PostController {
   @Post(':id/like')
   createLike(@User('id') userId: number, @Param('id') id: number) {
     return this.postService.createLike(id, userId);
+  }
+
+  @ApiBearerAuth('jwt')
+  @UseGuards(AuthGuard)
+  @Post(':id/deslike')
+  createDeslike(@User('id') userId: number, @Param('id') id: number) {
+    return this.postService.createDeslike(id, userId);
   }
 }
