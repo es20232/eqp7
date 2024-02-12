@@ -8,8 +8,10 @@ import { mockDeep } from 'jest-mock-extended';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PostRepository } from '../repositories/post.repository';
 import { UserRepository } from '../repositories/user.repository';
-import { CreateCommentDto } from './dto/post.dto';
+import { CreateCommentDto, PostResponseDto } from './dto/post.dto';
 import { PostService } from './post.service';
+
+const url = `${process.env.APP_URL}/uploads`;
 
 const mockUserReturnData = {
   id: 1,
@@ -36,6 +38,31 @@ const mockCommentReturnData = {
   userId: 1,
 };
 
+const mockPaginatedCommentsData = {
+  data: [
+    {
+      postId: 1,
+      userId: 1,
+      comment: 'Test Comment',
+      date: new Date(),
+      user: { ...mockUserReturnData },
+    },
+  ],
+  meta: { cursor: null, hasMore: false },
+};
+
+const mockPaginatedLikesData = {
+  data: [
+    {
+      postId: 1,
+      userId: 1,
+      date: new Date(),
+      user: { ...mockUserReturnData },
+    },
+  ],
+  meta: { cursor: null, hasMore: false },
+};
+
 const mockLikeReturnData = {
   id: 1,
   postId: 1,
@@ -45,6 +72,34 @@ const mockLikeReturnData = {
 
 const mockCreateCommentData: CreateCommentDto = {
   comment: 'Test Comment',
+};
+
+const mockGetPostData = {
+  postImages: [
+    {
+      id: 1,
+      postId: 1,
+      image: 'img1.png',
+    },
+  ],
+  user: { ...mockUserReturnData },
+  ...mockPostReturnData,
+};
+
+const mockPaginatedPostsData = {
+  data: [
+    new PostResponseDto({
+      ...mockGetPostData,
+      postImages: [
+        {
+          postId: 1,
+          image: 'img1.png',
+          imageUrl: `${url}/img1.png`,
+        },
+      ],
+    }),
+  ],
+  meta: { cursor: null, hasMore: false },
 };
 
 describe('PostService', () => {
@@ -71,9 +126,14 @@ describe('PostService', () => {
             findPostById: jest.fn().mockResolvedValue(mockPostReturnData),
             findCommentByUserId: jest.fn().mockReturnValue(null),
             findLikeByUserId: jest.fn().mockReturnValue(null),
+            countPostLikes: jest.fn().mockReturnValue(1),
+            countPostComments: jest.fn().mockResolvedValue(1),
             getPostComments: jest.fn(),
+            getPostLikes: jest.fn(),
             createComment: jest.fn(),
             createLike: jest.fn(),
+            getPost: jest.fn(),
+            getAllPosts: jest.fn(),
           },
         },
       ],
@@ -88,33 +148,14 @@ describe('PostService', () => {
   });
 
   describe('getPostComments', () => {
-    const mockCommentsData = {
-      data: [
-        {
-          postId: 1,
-          userId: 1,
-          comment: 'Test Comment',
-          date: new Date(),
-          user: {
-            id: 1,
-            name: 'John Doe',
-            username: 'john.doe',
-            email: 'john@example.com',
-            password: 'hashedpassword',
-          },
-        },
-      ],
-      meta: { cursor: null, hasMore: false },
-    };
-
-    it('should return transformed comments data', async () => {
+    it('should return paginated comments data', async () => {
       jest
         .spyOn(postRepository, 'getPostComments')
-        .mockResolvedValue(mockCommentsData);
+        .mockResolvedValue(mockPaginatedCommentsData);
 
       const result = await service.getPostComments(1, 0, 10);
 
-      expect(result).toEqual(mockCommentsData);
+      expect(result).toEqual(mockPaginatedCommentsData);
     });
 
     it('should throw an exception if an error occurs', async () => {
@@ -127,7 +168,37 @@ describe('PostService', () => {
         );
 
       await expect(service.getPostComments(1, 0, 10)).rejects.toThrow(
-        'Erro interno ao buscar comentários do post',
+        new InternalServerErrorException(
+          'Erro interno ao buscar comentários do post',
+        ),
+      );
+    });
+  });
+
+  describe('getPostLikes', () => {
+    it('should return paginated likes data', async () => {
+      jest
+        .spyOn(postRepository, 'getPostLikes')
+        .mockResolvedValue(mockPaginatedLikesData);
+
+      const result = await service.getPostLikes(1, 0, 10);
+
+      expect(result).toEqual(mockPaginatedLikesData);
+    });
+
+    it('should throw an exception if an error occurs', async () => {
+      jest
+        .spyOn(postRepository, 'getPostLikes')
+        .mockRejectedValue(
+          new InternalServerErrorException(
+            'Erro interno ao buscar likes do post',
+          ),
+        );
+
+      await expect(service.getPostLikes(1, 0, 10)).rejects.toThrow(
+        new InternalServerErrorException(
+          'Erro interno ao buscar likes do post',
+        ),
       );
     });
   });
@@ -272,68 +343,71 @@ describe('PostService', () => {
       );
     });
   });
-});
 
-describe('PostRepository', () => {
-  let postRepository: PostRepository;
-  let prismaService: PrismaService;
+  describe('getPost', () => {
+    it('should return transformed post data', async () => {
+      jest.spyOn(postRepository, 'getPost').mockResolvedValue(mockGetPostData);
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        PostRepository,
-        {
-          provide: PrismaService,
-          useValue: {
-            postComments: {
-              findUnique: jest.fn(),
-              create: jest.fn(),
-            },
+      const result = await service.getPost(1);
+
+      expect(postRepository.countPostLikes).toHaveBeenCalled();
+      expect(postRepository.countPostComments).toHaveBeenCalled();
+      expect(result).toEqual({
+        ...mockGetPostData,
+        postImages: [
+          {
+            ...mockGetPostData.postImages[0],
+            imageUrl: `${url}/img1.png`,
           },
-        },
-        {
-          provide: PostRepository,
-          useValue: {
-            findPostById: jest.fn().mockReturnValue(mockPostReturnData),
-            findCommentByUserId: jest.fn().mockReturnValue(null),
-            getPostComments: jest.fn(),
-            createComment: jest.fn(),
-          },
-        },
-      ],
-    })
-      .overrideProvider(PrismaService)
-      .useValue(mockDeep<PrismaClient>())
-      .compile();
-
-    postRepository = module.get<PostRepository>(PostRepository);
-    prismaService = module.get<PrismaService>(PrismaService);
+        ],
+        totalComments: 1,
+        totalLikes: 1,
+      });
+    });
   });
 
-  describe('createComment', () => {
-    it('should call create method of the PrismaService', async () => {
+  it('should throw an exception if an error occurs', async () => {
+    jest
+      .spyOn(postRepository, 'getPost')
+      .mockRejectedValue(
+        new InternalServerErrorException('Erro interno ao buscar post'),
+      );
+
+    await expect(service.getPost(1)).rejects.toThrow(
+      new InternalServerErrorException('Erro interno ao buscar post'),
+    );
+  });
+
+  describe('getAllPosts', () => {
+    it('should return all posts paginated', async () => {
       jest
-        .spyOn(prismaService.postComments, 'create')
-        .mockResolvedValueOnce(mockCommentReturnData);
+        .spyOn(postRepository, 'getAllPosts')
+        .mockResolvedValue(mockPaginatedPostsData);
 
-      const result = await postRepository.createComment({
-        ...mockCreateCommentData,
-        user: {
-          connect: {
-            id: 1,
+      const result = await service.getAllPosts(0, 10);
+
+      expect(result).toEqual({
+        ...mockPaginatedPostsData,
+        data: [
+          {
+            ...mockPaginatedPostsData.data[0],
+            totalLikes: 1,
+            totalComments: 1,
           },
-        },
-        post: {
-          connect: {
-            id: 1,
-          },
-        },
+        ],
       });
+    });
 
-      console.log(result);
+    it('should throw an exception if an error occurs', async () => {
+      jest
+        .spyOn(postRepository, 'getAllPosts')
+        .mockRejectedValue(
+          new InternalServerErrorException('Erro interno ao buscar posts'),
+        );
 
-      // expect(prismaService.postComments.create).toHaveBeenCalledTimes(1);
-      expect(result).toEqual(mockCommentReturnData);
+      await expect(service.getAllPosts(0, 10)).rejects.toThrow(
+        new InternalServerErrorException('Erro interno ao buscar posts'),
+      );
     });
   });
 });
