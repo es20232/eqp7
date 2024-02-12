@@ -46,6 +46,7 @@ export class UserService {
     userId: number,
     profilePicture?: Express.Multer.File,
   ) {
+    console.log(bio);
     const user = await this.userRepository.findUserById(userId);
     if (!user) throw new NotFoundException('Usuário não encontrado');
     if (username) {

@@ -96,7 +96,7 @@ export class PostService {
   }
 
   async getAllPosts(cursor?: number, take?: number) {
-    const posts = await this.postRepository.getALLposts(cursor, take);
+    const posts = await this.postRepository.getAllPosts(cursor, take);
 
     const url = `${process.env.APP_URL}/uploads`;
 

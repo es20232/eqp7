@@ -123,7 +123,7 @@ export class PostRepository {
     }
   }
 
-  async getALLposts(cursor?: number, take?: number) {
+  async getAllPosts(cursor?: number, take?: number) {
     try {
       return paginator<PostResponseDto>({
         model: this.prismaService.userPost,
