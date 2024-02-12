@@ -47,6 +47,37 @@ export class PostRepository {
     }
   }
 
+  async deletePost(id: number) {
+    try {
+      await this.prismaService.userPost.delete({
+        where: {
+          id,
+        },
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Erro interno ao deletar post',
+        error,
+      );
+    }
+  }
+
+  async deleteComments(id: number, postId: number) {
+    try {
+      await this.prismaService.postComments.delete({
+        where: {
+          id,
+          postId,
+        },
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Erro interno ao deletar comentário',
+        error,
+      );
+    }
+  }
+
   async getPost(id: number) {
     try {
       return this.prismaService.userPost.findUnique({

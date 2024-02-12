@@ -41,6 +41,34 @@ export class PostService {
     return { id: result.id };
   }
 
+  async deletePost(id: number, userId: number) {
+    const post = await this.postRepository.getPost(id);
+
+    if (!post) {
+      throw new NotFoundException('Publicação não encontrada');
+    }
+
+    if (post.userId != userId) {
+      throw new NotFoundException('Sem permissão para deletar essa publicação');
+    }
+
+    await this.postRepository.deletePost(id);
+  }
+
+  async deleteComments(postId: number, id: number, userId: number) {
+    const post = await this.postRepository.getPost(postId);
+
+    if (!post) {
+      throw new NotFoundException('Publicação não encontrada');
+    }
+
+    if (post.userId != userId) {
+      throw new NotFoundException('Não é possível deletar esse comentário');
+    }
+
+    await this.postRepository.deleteComments(id, postId);
+  }
+
   async getPost(id: number) {
     const post = await this.postRepository.getPost(id);
 

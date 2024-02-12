@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpStatus,
   Param,
@@ -59,6 +60,24 @@ export class PostController {
     images: Express.Multer.File[],
   ) {
     return this.postService.createPost(body, images, userId);
+  }
+
+  @ApiBearerAuth('jwt')
+  @UseGuards(AuthGuard)
+  @Delete(':id')
+  deletePost(@User('id') userId: number, @Param('id') id: number) {
+    return this.postService.deletePost(id, userId);
+  }
+
+  @ApiBearerAuth('jwt')
+  @UseGuards(AuthGuard)
+  @Delete(':id/:commentId')
+  deleteComments(
+    @Param('id') postId: number,
+    @Param('commentId') id: number,
+    @User('id') userId: number,
+  ) {
+    return this.postService.deleteComments(postId, id, userId);
   }
 
   @Get(':id')
