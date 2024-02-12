@@ -8,27 +8,17 @@ import { mockDeep } from 'jest-mock-extended';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PostRepository } from '../repositories/post.repository';
 import { UserRepository } from '../repositories/user.repository';
-import { CreateCommentDto, PostResponseDto } from './dto/post.dto';
+import {
+  mockCreateCommentData,
+  mockGetPostData,
+  mockPaginatedCommentsData,
+  mockPaginatedLikesData,
+  mockPaginatedPostsData,
+  mockPostReturnData,
+  mockUserReturnData,
+  uploadUrl,
+} from './post.controller.spec';
 import { PostService } from './post.service';
-
-const url = `${process.env.APP_URL}/uploads`;
-
-const mockUserReturnData = {
-  id: 1,
-  name: 'john doe',
-  username: 'johnjohn',
-  email: 'john@gmail.com',
-  password: 'kskhskhdksjdow',
-  profilePicture: 'img1.png',
-  bio: 'hello world!',
-};
-
-const mockPostReturnData = {
-  id: 1,
-  userId: 1,
-  description: 'nice',
-  date: new Date(),
-};
 
 const mockCommentReturnData = {
   id: 1,
@@ -38,68 +28,11 @@ const mockCommentReturnData = {
   userId: 1,
 };
 
-const mockPaginatedCommentsData = {
-  data: [
-    {
-      postId: 1,
-      userId: 1,
-      comment: 'Test Comment',
-      date: new Date(),
-      user: { ...mockUserReturnData },
-    },
-  ],
-  meta: { cursor: null, hasMore: false },
-};
-
-const mockPaginatedLikesData = {
-  data: [
-    {
-      postId: 1,
-      userId: 1,
-      date: new Date(),
-      user: { ...mockUserReturnData },
-    },
-  ],
-  meta: { cursor: null, hasMore: false },
-};
-
 const mockLikeReturnData = {
   id: 1,
   postId: 1,
   date: new Date(),
   userId: 1,
-};
-
-const mockCreateCommentData: CreateCommentDto = {
-  comment: 'Test Comment',
-};
-
-const mockGetPostData = {
-  postImages: [
-    {
-      id: 1,
-      postId: 1,
-      image: 'img1.png',
-    },
-  ],
-  user: { ...mockUserReturnData },
-  ...mockPostReturnData,
-};
-
-const mockPaginatedPostsData = {
-  data: [
-    new PostResponseDto({
-      ...mockGetPostData,
-      postImages: [
-        {
-          postId: 1,
-          image: 'img1.png',
-          imageUrl: `${url}/img1.png`,
-        },
-      ],
-    }),
-  ],
-  meta: { cursor: null, hasMore: false },
 };
 
 describe('PostService', () => {
@@ -111,9 +44,6 @@ describe('PostService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         PostService,
-        PostRepository,
-        UserRepository,
-        PrismaService,
         {
           provide: UserRepository,
           useValue: {
@@ -233,14 +163,6 @@ describe('PostService', () => {
 
     it('should throw an exception if user has already commented', async () => {
       jest
-        .spyOn(postRepository, 'createComment')
-        .mockRejectedValue(
-          new ConflictException(
-            'Não é possível fazer mais de um comentário por postagem',
-          ),
-        );
-
-      jest
         .spyOn(postRepository, 'findCommentByUserId')
         .mockResolvedValue(mockCommentReturnData);
 
@@ -300,14 +222,6 @@ describe('PostService', () => {
 
     it('should throw an exception if user has already liked', async () => {
       jest
-        .spyOn(postRepository, 'createLike')
-        .mockRejectedValue(
-          new ConflictException(
-            'Não é possível dar mais de um like por postagem',
-          ),
-        );
-
-      jest
         .spyOn(postRepository, 'findLikeByUserId')
         .mockResolvedValue(mockLikeReturnData);
 
@@ -357,7 +271,7 @@ describe('PostService', () => {
         postImages: [
           {
             ...mockGetPostData.postImages[0],
-            imageUrl: `${url}/img1.png`,
+            imageUrl: `${uploadUrl}/img1.png`,
           },
         ],
         totalComments: 1,
@@ -408,6 +322,61 @@ describe('PostService', () => {
       await expect(service.getAllPosts(0, 10)).rejects.toThrow(
         new InternalServerErrorException('Erro interno ao buscar posts'),
       );
+    });
+  });
+});
+
+describe('PostRepository', () => {
+  let postRepository: PostRepository;
+  let prismaService: PrismaService;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        PostRepository,
+        {
+          provide: PrismaService,
+          useValue: {
+            postComments: {
+              findUnique: jest.fn(),
+              create: jest.fn(),
+            },
+          },
+        },
+      ],
+    })
+      .overrideProvider(PrismaService)
+      .useValue(mockDeep<PrismaClient>())
+      .compile();
+
+    postRepository = module.get<PostRepository>(PostRepository);
+    prismaService = module.get<PrismaService>(PrismaService);
+  });
+
+  describe('createComment', () => {
+    it('should call create method of the PrismaService', async () => {
+      jest
+        .spyOn(prismaService.postComments, 'create')
+        .mockResolvedValueOnce(mockCommentReturnData);
+
+      const result = await postRepository.createComment({
+        ...mockCreateCommentData,
+        user: {
+          connect: {
+            id: 1,
+          },
+        },
+        post: {
+          connect: {
+            id: 1,
+          },
+        },
+      });
+
+      console.log(result);
+
+      expect(prismaService.postComments.create).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(mockCommentReturnData);
     });
   });
 });
