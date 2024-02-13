@@ -21,7 +21,6 @@ export class PaginationParamsDto {
 
   @ApiPropertyOptional({
     description: 'A partir de qual registro a busca deve continuar',
-    minimum: 1,
   })
   @IsOptional()
   @Transform(({ value }) => Number(value))
