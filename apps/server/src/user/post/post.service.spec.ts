@@ -58,6 +58,7 @@ describe('PostService', () => {
             findLikeByUserId: jest.fn().mockReturnValue(null),
             countPostLikes: jest.fn().mockReturnValue(1),
             countPostComments: jest.fn().mockResolvedValue(1),
+            countPostDeslikes: jest.fn().mockResolvedValue(1),
             getPostComments: jest.fn(),
             getPostLikes: jest.fn(),
             createComment: jest.fn(),
@@ -276,6 +277,7 @@ describe('PostService', () => {
         ],
         totalComments: 1,
         totalLikes: 1,
+        totalDeslikes: 1,
       });
     });
   });
@@ -307,6 +309,7 @@ describe('PostService', () => {
             ...mockPaginatedPostsData.data[0],
             totalLikes: 1,
             totalComments: 1,
+            totalDeslikes: 1,
           },
         ],
       });
@@ -372,8 +375,6 @@ describe('PostRepository', () => {
           },
         },
       });
-
-      console.log(result);
 
       expect(prismaService.postComments.create).toHaveBeenCalledTimes(1);
       expect(result).toEqual(mockCommentReturnData);

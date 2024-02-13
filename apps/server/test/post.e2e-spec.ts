@@ -2,6 +2,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserPost } from '@prisma/client';
+import * as bcrypt from 'bcryptjs';
 import { format } from 'date-fns';
 import { AppModule } from 'src/app.module';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -13,8 +14,10 @@ describe('PostController (e2e)', () => {
   let app: INestApplication;
   let prismaService: PrismaService;
   let post: UserPost;
+  let token: string;
+  const testImage = `${__dirname}/test-files/test.jpg`;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -44,7 +47,7 @@ describe('PostController (e2e)', () => {
               create: {
                 email: 'test@test.com',
                 name: 'john doe',
-                password: 'kajsakswd',
+                password: await bcrypt.hash('Test123', 10),
                 username: 'johnjohn',
               },
               where: {
@@ -59,14 +62,8 @@ describe('PostController (e2e)', () => {
         data: {
           image: 'img1.png',
           post: {
-            connectOrCreate: {
-              create: {
-                description: 'nice day',
-                userId: 1,
-              },
-              where: {
-                id: 1,
-              },
+            connect: {
+              id: post.id,
             },
           },
         },
@@ -76,13 +73,27 @@ describe('PostController (e2e)', () => {
     });
   });
 
+  describe('POST /auth/sign-in', () => {
+    it('should log-in an user', async () => {
+      const { status, body } = await request(app.getHttpServer())
+        .post('/auth/sign-in')
+        .send({
+          user: 'test@test.com',
+          password: 'Test123',
+        });
+
+      expect(status).toBe(201);
+      expect(body.user.email).toEqual('test@test.com');
+
+      token = body.accessToken.value;
+    });
+  });
+
   describe('GET /post:id', () => {
     it('should return a post', async () => {
       const { status, body } = await request(app.getHttpServer()).get(
         `/post/${post.id}`,
       );
-
-      console.log(body);
 
       expect(status).toBe(200);
       expect(body).toEqual({
@@ -105,7 +116,21 @@ describe('PostController (e2e)', () => {
         },
         totalComments: 0,
         totalLikes: 0,
+        totalDeslikes: 0,
       });
+    });
+  });
+
+  describe('POST /post', () => {
+    it('should create a post', async () => {
+      const { status, body } = await request(app.getHttpServer())
+        .post('/post')
+        .set('Authorization', `Bearer ${token}`)
+        .attach('images', testImage)
+        .field('description', 'hello world');
+
+      expect(status).toBe(201);
+      expect(body.id).toBeGreaterThanOrEqual(0);
     });
   });
 });
