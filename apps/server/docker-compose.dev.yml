@@ -1,0 +1,13 @@
+version: '3.9'
+services:
+  database-dev:
+    env_file:
+      - .env.test
+    container_name: visualsocial-container-dev
+    hostname: visualsocial-container-dev
+    image: postgres:13-alpine
+    restart: always
+    ports:
+      - '5434:5432'
+    environment:
+      TZ: America/Sao_Paulo
