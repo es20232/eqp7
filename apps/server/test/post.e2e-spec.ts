@@ -39,7 +39,7 @@ describe('PostController (e2e)', () => {
       }),
     );
 
-    app.getHttpServer().listen(0);
+    await app.getHttpServer().listen(0);
 
     await app.init();
 
@@ -120,6 +120,8 @@ describe('PostController (e2e)', () => {
       }),
     );
 
+    await app.getHttpServer().listen(0);
+
     await app.init();
   });
 
@@ -193,7 +195,7 @@ describe('PostController (e2e)', () => {
     it('should not create a post with an invalid image format', async () => {
       await request(app.getHttpServer())
         .post('/post')
-        .set('Authorization', `Bearer anything`)
+        .set('Authorization', `Bearer ${token}`)
         .attach('images', testImageFails)
         .field('description', 'hello world')
         .expect(HttpStatus.UNPROCESSABLE_ENTITY);
@@ -204,7 +206,6 @@ describe('PostController (e2e)', () => {
     it('should not let a not signed-in user create a a post', async () => {
       await request(app.getHttpServer())
         .post('/post')
-        .set('Authorization', `Bearer anything`)
         .attach('images', testImage)
         .field('description', 'hello world')
         .expect(HttpStatus.FORBIDDEN);
@@ -266,7 +267,7 @@ describe('PostController (e2e)', () => {
       expect(body.id).toBeGreaterThanOrEqual(0);
     });
 
-    it('should not let user comment twice', async () => {
+    it('should not let user comments twice', async () => {
       await request(app.getHttpServer())
         .post(`/post/${post.id}/comment`)
         .set('Authorization', `Bearer ${token}`)
@@ -277,5 +278,76 @@ describe('PostController (e2e)', () => {
     });
   });
 
-  describe('POST /post/:id/like', () => {});
+  describe('POST /post/:id/like', () => {
+    it('should create a like', async () => {
+      const { status, body } = await request(app.getHttpServer())
+        .post(`/post/${post.id}/like`)
+        .set('Authorization', `Bearer ${token}`);
+
+      expect(status).toBe(201);
+      expect(body.id).toBeGreaterThanOrEqual(0);
+    });
+
+    it('should not let user likes twice', async () => {
+      await request(app.getHttpServer())
+        .post(`/post/${post.id}/like`)
+        .set('Authorization', `Bearer ${token}`)
+        .expect(HttpStatus.CONFLICT);
+    });
+  });
+
+  describe('GET /post/:id/comments', () => {
+    it('should return all the comments from a post', async () => {
+      const { status, body } = await request(app.getHttpServer()).get(
+        `/post/${post.id}/comments`,
+      );
+
+      expect(status).toBe(200);
+
+      expect(body).toHaveProperty('data');
+      expect(body).toHaveProperty('meta');
+      expect(body.data[0]).toMatchObject({
+        comment: expect.any(String),
+        date: expect.any(String),
+        user: {
+          id: expect.any(Number),
+          name: expect.any(String),
+          username: expect.any(String),
+          email: expect.any(String),
+          bio: null,
+        },
+      });
+      expect(body.meta).toMatchObject({
+        cursor: expect.any(Number),
+        hasMore: expect.any(Boolean),
+      });
+    });
+  });
+
+  describe('GET /post/:id/likes', () => {
+    it('should return all the likes from a post', async () => {
+      const { status, body } = await request(app.getHttpServer()).get(
+        `/post/${post.id}/likes`,
+      );
+
+      expect(status).toBe(200);
+
+      expect(body).toHaveProperty('data');
+      expect(body).toHaveProperty('meta');
+      expect(body.data[0]).toMatchObject({
+        date: expect.any(String),
+        user: {
+          id: expect.any(Number),
+          name: expect.any(String),
+          username: expect.any(String),
+          email: expect.any(String),
+          bio: null,
+        },
+      });
+      expect(body.meta).toMatchObject({
+        cursor: expect.any(Number),
+        hasMore: expect.any(Boolean),
+      });
+    });
+  });
 });
