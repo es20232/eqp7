@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpStatus,
   Param,
@@ -61,6 +62,24 @@ export class PostController {
     return this.postService.createPost(body, images, userId);
   }
 
+  @ApiBearerAuth('jwt')
+  @UseGuards(AuthGuard)
+  @Delete(':id')
+  deletePost(@User('id') userId: number, @Param('id') id: number) {
+    return this.postService.deletePost(id, userId);
+  }
+
+  @ApiBearerAuth('jwt')
+  @UseGuards(AuthGuard)
+  @Delete(':id/:commentId')
+  deleteComments(
+    @Param('id') postId: number,
+    @Param('commentId') id: number,
+    @User('id') userId: number,
+  ) {
+    return this.postService.deleteComments(postId, id, userId);
+  }
+
   @Get(':id')
   getPost(@Param('id') id: number) {
     return this.postService.getPost(id);
@@ -81,6 +100,15 @@ export class PostController {
     { cursor, take }: PaginationParamsDto,
   ) {
     return this.postService.getPostLikes(id, cursor, take);
+  }
+
+  @Get(':id/deslikes')
+  getPostDeslikes(
+    @Param('id') id: number,
+    @Query()
+    { cursor, take }: PaginationParamsDto,
+  ) {
+    return this.postService.getPostDeslikes(id, cursor, take);
   }
 
   @Get(':id/comments')
@@ -108,5 +136,12 @@ export class PostController {
   @Post(':id/like')
   createLike(@User('id') userId: number, @Param('id') id: number) {
     return this.postService.createLike(id, userId);
+  }
+
+  @ApiBearerAuth('jwt')
+  @UseGuards(AuthGuard)
+  @Post(':id/deslike')
+  createDeslike(@User('id') userId: number, @Param('id') id: number) {
+    return this.postService.createDeslike(id, userId);
   }
 }

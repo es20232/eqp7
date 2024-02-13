@@ -6,6 +6,7 @@ import {
   Param,
   ParseFilePipeBuilder,
   Put,
+  Query,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -18,6 +19,7 @@ import { AuthGuard } from 'src/guards/auth.guard';
 import { UpdateUserDto } from './dto/user.dto';
 import { PostService } from './post/post.service';
 import { UserService } from './user.service';
+import { PaginationParamsDto } from 'src/dtos/paginator.dto';
 
 @ApiTags('user')
 @Controller('user')
@@ -34,9 +36,14 @@ export class UserController {
     return this.userService.getProfile(userId);
   }
 
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth('jwt')
   @Get(':id/posts')
-  getUserPosts(@Param('id') id: number) {
-    return this.postService.getUserPosts(id);
+  getUserPosts(
+    @Param('id') userId: number,
+    @Query() { cursor, take }: PaginationParamsDto,
+  ) {
+    return this.postService.getUserPosts(userId, cursor, take);
   }
 
   @UseInterceptors(
