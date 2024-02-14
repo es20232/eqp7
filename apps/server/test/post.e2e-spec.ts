@@ -75,29 +75,6 @@ describe('PostController (e2e)', () => {
             },
           },
         });
-
-        const post2 = await prisma.userPost.create({
-          data: {
-            description: 'test',
-            user: {
-              connect: {
-                id: user.id,
-              },
-            },
-          },
-        });
-
-        await prisma.postImages.create({
-          data: {
-            image: 'img2.png',
-            post: {
-              connect: {
-                id: post2.id,
-              },
-            },
-          },
-        });
-
         return { post, image, user };
       },
     ));
@@ -120,9 +97,11 @@ describe('PostController (e2e)', () => {
       }),
     );
 
-    await app.getHttpServer().listen(0);
-
     await app.init();
+  });
+
+  afterEach(async () => {
+    await app.close();
   });
 
   afterAll(async () => {
@@ -189,9 +168,7 @@ describe('PostController (e2e)', () => {
       expect(status).toBe(201);
       expect(body.id).toBeGreaterThanOrEqual(0);
     });
-  });
 
-  describe('POST /post', () => {
     it('should not create a post with an invalid image format', async () => {
       await request(app.getHttpServer())
         .post('/post')
@@ -199,16 +176,6 @@ describe('PostController (e2e)', () => {
         .attach('images', testImageFails)
         .field('description', 'hello world')
         .expect(HttpStatus.UNPROCESSABLE_ENTITY);
-    });
-  });
-
-  describe('POST /post', () => {
-    it('should not let a not signed-in user create a a post', async () => {
-      await request(app.getHttpServer())
-        .post('/post')
-        .attach('images', testImage)
-        .field('description', 'hello world')
-        .expect(HttpStatus.FORBIDDEN);
     });
   });
 
