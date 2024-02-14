@@ -24,7 +24,7 @@ export function PostList() {
           <div className="space-y-4">
             {data?.pages.map((page) => (
               <React.Fragment key={page.nextCursor}>
-                {page.posts?.map((post) => <Post {...post} />)}
+                {page.posts?.map((post) => <Post {...post} key={post.id} />)}
               </React.Fragment>
             ))}
           </div>
