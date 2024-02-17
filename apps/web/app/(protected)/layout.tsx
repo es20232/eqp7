@@ -1,13 +1,11 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Input } from '@/components/ui/input'
-
 import { Search } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { getInitials } from '@/lib/utils'
 import { getServerSession } from '@/lib/auth/getServerSession'
 import Logo from '@/public/logo.svg'
-
 export default async function ProtectedLayout({
   children,
 }: {
