@@ -30,15 +30,15 @@ export function Post(post: PostType) {
       <p className="text-muted-foreground">{post.description}</p>
 
       <div className="mt-4 flex">
-        <Button variant="icon">
+        <Button variant="outline">
           <ThumbsUp className="h-6 w-6 text-blue-500" />
         </Button>
 
-        <Button variant="icon" className="ml-4">
+        <Button variant="outline" className="ml-4">
           <ThumbsDown className="h-6 w-6 text-red-500" />
         </Button>
 
-        <Button variant="icon" className="ml-4">
+        <Button variant="outline" className="ml-4">
           <MessageSquare className="h-6 w-6 text-green-500" />
         </Button>
       </div>
