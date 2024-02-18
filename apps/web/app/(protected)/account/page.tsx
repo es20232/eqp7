@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Pen } from 'lucide-react'
+import { Pen, ReceiptText } from 'lucide-react'
 import { ProfileMoreActions } from '@/components/account/profile-more-actions'
 import { getServerSession } from '@/lib/auth/getServerSession'
 import { ProfilePicture } from './_components/profile-picture'
@@ -9,12 +9,21 @@ export default async function Account() {
   const {
     session: { user },
   } = await getServerSession()
+
   return (
     <div>
       <div className="h-[30vh] w-full bg-gray-100" />
-      <div className="mx-auto max-w-7xl  p-5 sm:flex-row sm:gap-6">
-        <div className="relative flex  justify-end">
+      <div className="mx-auto max-w-7xl p-5 sm:flex-row sm:gap-6">
+        <div className="relative flex justify-end">
           <ProfilePicture />
+          <div className="flex gap-6">
+            <Link href="/account/post">
+              <Button variant="outline">
+                <ReceiptText className="mr-2 h-6 w-5" />
+                Publicação
+              </Button>
+            </Link>
+          </div>
           <div className="flex gap-2">
             <Link href="/account/edit">
               <Button variant="outline">

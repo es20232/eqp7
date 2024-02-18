@@ -179,6 +179,9 @@ importers:
       '@radix-ui/react-tooltip':
         specifier: ^1.0.7
         version: 1.0.7(@types/react-dom@18.2.18)(@types/react@18.2.54)(react-dom@18.2.0)(react@18.2.0)
+      '@tanstack/react-query':
+        specifier: ^5.18.1
+        version: 5.18.1(react@18.2.0)
       '@types/js-cookie':
         specifier: ^3.0.6
         version: 3.0.6
@@ -224,6 +227,9 @@ importers:
       react-image-crop:
         specifier: ^11.0.5
         version: 11.0.5(react@18.2.0)
+      react-intersection-observer:
+        specifier: ^9.8.0
+        version: 9.8.0(react-dom@18.2.0)(react@18.2.0)
       react-resizable-panels:
         specifier: ^1.0.9
         version: 1.0.10(react-dom@18.2.0)(react@18.2.0)
@@ -2255,6 +2261,19 @@ packages:
     resolution: {integrity: sha512-E4KcWTpoLHqwPHLxidpOqQbcrZVgi0rsmmZXUle1jXmJfuIf/UWpczUJ7MZZ5tlxytgJXyp0w4PGkkeLiuIdZw==}
     dependencies:
       tslib: 2.6.2
+    dev: false
+
+  /@tanstack/query-core@5.18.1:
+    resolution: {integrity: sha512-fYhrG7bHgSNbnkIJF2R4VUXb4lF7EBiQjKkDc5wOlB7usdQOIN4LxxHpDxyE3qjqIst1WBGvDtL48T0sHJGKCw==}
+    dev: false
+
+  /@tanstack/react-query@5.18.1(react@18.2.0):
+    resolution: {integrity: sha512-PdI07BbsahZ+04PxSuDQsQvBWe008eWFk/YYWzt8fvzt2sALUM0TpAJa/DFpqa7+SSo7j1EQR6Jx6znXNHyaXw==}
+    peerDependencies:
+      react: ^18.0.0
+    dependencies:
+      '@tanstack/query-core': 5.18.1
+      react: 18.2.0
     dev: false
 
   /@tsconfig/node10@1.0.9:
@@ -6894,6 +6913,19 @@ packages:
       react: '>=16.13.1'
     dependencies:
       react: 18.2.0
+    dev: false
+
+  /react-intersection-observer@9.8.0(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-wXHvMQUsTagh3X0Z6jDtGkIXc3VVCd2tjDRYR9kII3GKrZr0XF0xtpfdamo2n8BSF+zzfeeBVOTjxZWpBp9X0g==}
+    peerDependencies:
+      react: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
+      react-dom: ^15.0.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
+    peerDependenciesMeta:
+      react-dom:
+        optional: true
+    dependencies:
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
     dev: false
 
   /react-is@16.13.1:
