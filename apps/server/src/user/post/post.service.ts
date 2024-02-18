@@ -175,6 +175,7 @@ export class PostService {
         totalLikes: await this.postRepository.countPostLikes(post.id),
         totalDeslikes: await this.postRepository.countPostDeslikes(post.id),
         totalComments: await this.postRepository.countPostComments(post.id),
+        user: await this.userService.getProfile(post.userId),
       })),
     );
 
