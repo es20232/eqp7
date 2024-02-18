@@ -4,6 +4,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import paginator from 'src/utils/paginator';
 import {
   PostCommentsResponseDto,
+  PostDeslikesResponseDto,
   PostLikesResponseDto,
   PostResponseDto,
 } from '../post/dto/post.dto';
@@ -47,6 +48,37 @@ export class PostRepository {
     }
   }
 
+  async deletePost(id: number) {
+    try {
+      await this.prismaService.userPost.delete({
+        where: {
+          id,
+        },
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Erro interno ao deletar post',
+        error,
+      );
+    }
+  }
+
+  async deleteComments(id: number, postId: number) {
+    try {
+      await this.prismaService.postComments.delete({
+        where: {
+          id,
+          postId,
+        },
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Erro interno ao deletar comentário',
+        error,
+      );
+    }
+  }
+
   async getPost(id: number) {
     try {
       return this.prismaService.userPost.findUnique({
@@ -71,9 +103,6 @@ export class PostRepository {
       return paginator<PostCommentsResponseDto>(
         {
           model: this.prismaService.postComments,
-          include: {
-            user: true,
-          },
           take,
           cursor,
         },
@@ -92,9 +121,6 @@ export class PostRepository {
       return paginator<PostLikesResponseDto>(
         {
           model: this.prismaService.postLikes,
-          include: {
-            user: true,
-          },
           take,
           cursor,
         },
@@ -108,22 +134,51 @@ export class PostRepository {
     }
   }
 
-  async getUserPosts(userId: number) {
+  async getPostDeslikes(postId: number, cursor?: number, take?: number) {
     try {
-      return this.prismaService.userPost.findMany({
-        where: {
-          userId,
+      return paginator<PostDeslikesResponseDto>(
+        {
+          model: this.prismaService.postDeslikes,
+          take,
+          cursor,
         },
-      });
+        { where: { postId } },
+      );
     } catch (error) {
       throw new InternalServerErrorException(
-        'Erro interno ao buscar posts do usuário',
+        'Erro interno ao buscar deslikes do post',
         error,
       );
     }
   }
 
-  async getALLposts(cursor?: number, take?: number) {
+  async getUserPosts(userId: number, cursor?: number, take?: number) {
+    try {
+      return paginator<PostResponseDto>(
+        {
+          model: this.prismaService.userPost,
+          cursor,
+          take,
+          include: {
+            postImages: true,
+            user: true,
+          },
+        },
+        {
+          where: {
+            userId,
+          },
+        },
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Erro interno ao buscar posts',
+        error,
+      );
+    }
+  }
+
+  async getAllPosts(cursor?: number, take?: number) {
     try {
       return paginator<PostResponseDto>({
         model: this.prismaService.userPost,
@@ -152,6 +207,21 @@ export class PostRepository {
     } catch (error) {
       throw new InternalServerErrorException(
         'Erro interno ao contar likes do post',
+        error,
+      );
+    }
+  }
+
+  async countPostDeslikes(postId: number) {
+    try {
+      return this.prismaService.postDeslikes.count({
+        where: {
+          postId,
+        },
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Erro interno ao contar deslikes do post',
         error,
       );
     }
@@ -195,6 +265,19 @@ export class PostRepository {
     }
   }
 
+  async createDeslike(data: Prisma.PostDeslikesCreateInput) {
+    try {
+      return this.prismaService.postDeslikes.create({
+        data,
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Erro interno ao dar deslike',
+        error,
+      );
+    }
+  }
+
   async findPostById(id: number) {
     try {
       return this.prismaService.userPost.findUnique({
@@ -205,6 +288,28 @@ export class PostRepository {
     } catch (error) {
       throw new InternalServerErrorException(
         'Erro interno ao buscar post',
+        error,
+      );
+    }
+  }
+
+  async findDeslikeByUserId(userId: number, postId: number) {
+    try {
+      return this.prismaService.postDeslikes.findFirst({
+        where: {
+          AND: [
+            {
+              userId,
+            },
+            {
+              postId,
+            },
+          ],
+        },
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Erro interno ao buscar deslike',
         error,
       );
     }

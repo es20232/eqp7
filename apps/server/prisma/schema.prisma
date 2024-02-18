@@ -24,17 +24,19 @@ model User {
   postComments       PostComments[]
   postLikes          PostLikes[]
   userPosts          UserPost[]
+  PostDeslikes       PostDeslikes[]
 }
 
 model UserPost {
   id           Int            @id @default(autoincrement())
   userId       Int
   user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  description  String
+  description  String?
   date         DateTime       @default(now())
   postImages   PostImages[]
   postComments PostComments[]
   postLikes    PostLikes[]
+  PostDeslikes PostDeslikes[]
 }
 
 model PostImages {
@@ -55,6 +57,15 @@ model PostComments {
 }
 
 model PostLikes {
+  id     Int      @id @default(autoincrement())
+  postId Int
+  post   UserPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  date   DateTime @default(now())
+  userId Int
+  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PostDeslikes {
   id     Int      @id @default(autoincrement())
   postId Int
   post   UserPost @relation(fields: [postId], references: [id], onDelete: Cascade)

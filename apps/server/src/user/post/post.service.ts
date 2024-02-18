@@ -5,10 +5,12 @@ import {
 } from '@nestjs/common';
 import { PostRepository } from '../repositories/post.repository';
 import { UserRepository } from '../repositories/user.repository';
+import { UserService } from '../user.service';
 import {
   CreateCommentDto,
   CreatePostDto,
   PostCommentsResponseDto,
+  PostDeslikesResponseDto,
   PostLikesResponseDto,
   PostResponseDto,
 } from './dto/post.dto';
@@ -18,6 +20,7 @@ export class PostService {
   constructor(
     private readonly postRepository: PostRepository,
     private readonly userRepository: UserRepository,
+    private readonly userService: UserService,
   ) {}
   async createPost(
     { description }: CreatePostDto,
@@ -41,6 +44,34 @@ export class PostService {
     return { id: result.id };
   }
 
+  async deletePost(id: number, userId: number) {
+    const post = await this.postRepository.findPostById(id);
+
+    if (!post) {
+      throw new NotFoundException('Publicação não encontrada');
+    }
+
+    if (post.userId != userId) {
+      throw new NotFoundException('Sem permissão para deletar essa publicação');
+    }
+
+    await this.postRepository.deletePost(id);
+  }
+
+  async deleteComments(postId: number, id: number, userId: number) {
+    const post = await this.postRepository.findPostById(postId);
+
+    if (!post) {
+      throw new NotFoundException('Publicação não encontrada');
+    }
+
+    if (post.userId != userId) {
+      throw new NotFoundException('Não é possível deletar esse comentário');
+    }
+
+    await this.postRepository.deleteComments(id, postId);
+  }
+
   async getPost(id: number) {
     const post = await this.postRepository.getPost(id);
 
@@ -52,6 +83,8 @@ export class PostService {
 
     const totalComments = await this.postRepository.countPostComments(id);
 
+    const totalDeslikes = await this.postRepository.countPostDeslikes(id);
+
     const url = `${process.env.APP_URL}/uploads`;
 
     const postWithUrl = {
@@ -62,6 +95,7 @@ export class PostService {
       })),
       totalLikes,
       totalComments,
+      totalDeslikes,
     };
 
     return new PostResponseDto(postWithUrl);
@@ -70,11 +104,39 @@ export class PostService {
   async getPostLikes(id: number, cursor?: number, take?: number) {
     const likes = await this.postRepository.getPostLikes(id, cursor, take);
 
-    const transformedData = likes.data.map((like) => {
+    const likesWithPictureUrl = await Promise.all(
+      likes.data.map(async (like) => ({
+        ...like,
+        user: await this.userService.getProfile(like.userId),
+      })),
+    );
+
+    const transformedData = likesWithPictureUrl.map((like) => {
       return new PostLikesResponseDto(like);
     });
 
     return { data: transformedData, meta: likes.meta };
+  }
+
+  async getPostDeslikes(id: number, cursor?: number, take?: number) {
+    const deslikes = await this.postRepository.getPostDeslikes(
+      id,
+      cursor,
+      take,
+    );
+
+    const deslikesWithPictureUrl = await Promise.all(
+      deslikes.data.map(async (deslike) => ({
+        ...deslike,
+        user: await this.userService.getProfile(deslike.userId),
+      })),
+    );
+
+    const transformedData = deslikesWithPictureUrl.map((deslike) => {
+      return new PostDeslikesResponseDto(deslike);
+    });
+
+    return { data: transformedData, meta: deslikes.meta };
   }
 
   async getPostComments(id: number, cursor?: number, take?: number) {
@@ -84,19 +146,22 @@ export class PostService {
       take,
     );
 
-    const transformedData = comments.data.map((comment) => {
+    const commentsWithPictureUrl = await Promise.all(
+      comments.data.map(async (comment) => ({
+        ...comment,
+        user: await this.userService.getProfile(comment.userId),
+      })),
+    );
+
+    const transformedData = commentsWithPictureUrl.map((comment) => {
       return new PostCommentsResponseDto(comment);
     });
 
     return { data: transformedData, meta: comments.meta };
   }
 
-  async getUserPosts(userId: number) {
-    return userId;
-  }
-
-  async getAllPosts(cursor?: number, take?: number) {
-    const posts = await this.postRepository.getALLposts(cursor, take);
+  async getUserPosts(userId: number, cursor?: number, take?: number) {
+    const posts = await this.postRepository.getUserPosts(userId, cursor, take);
 
     const url = `${process.env.APP_URL}/uploads`;
 
@@ -108,7 +173,35 @@ export class PostService {
           imageUrl: `${url}/${image.image}`,
         })),
         totalLikes: await this.postRepository.countPostLikes(post.id),
+        totalDeslikes: await this.postRepository.countPostDeslikes(post.id),
         totalComments: await this.postRepository.countPostComments(post.id),
+        user: await this.userService.getProfile(post.userId),
+      })),
+    );
+
+    const transformedData = postsWithUrls.map((post) => {
+      return new PostResponseDto(post);
+    });
+
+    return { data: transformedData, meta: posts.meta };
+  }
+
+  async getAllPosts(cursor?: number, take?: number) {
+    const posts = await this.postRepository.getAllPosts(cursor, take);
+
+    const url = `${process.env.APP_URL}/uploads`;
+
+    const postsWithUrls = await Promise.all(
+      posts.data.map(async (post) => ({
+        ...post,
+        postImages: post.postImages.map((image) => ({
+          ...image,
+          imageUrl: `${url}/${image.image}`,
+        })),
+        totalLikes: await this.postRepository.countPostLikes(post.id),
+        totalDeslikes: await this.postRepository.countPostDeslikes(post.id),
+        totalComments: await this.postRepository.countPostComments(post.id),
+        user: await this.userService.getProfile(post.userId),
       })),
     );
 
@@ -198,5 +291,45 @@ export class PostService {
     });
 
     return { id: like.id };
+  }
+
+  async createDeslike(postId: number, userId: number) {
+    const userExists = await this.userRepository.findUserById(userId);
+
+    if (!userExists) {
+      throw new NotFoundException('Usuário não encontrado');
+    }
+
+    const postExists = await this.postRepository.findPostById(postId);
+
+    if (!postExists) {
+      throw new NotFoundException('Post não encontrado');
+    }
+
+    const userHasDesliked = await this.postRepository.findDeslikeByUserId(
+      userId,
+      postId,
+    );
+
+    if (userHasDesliked) {
+      throw new ConflictException(
+        'Não é possível dar mais de um deslike por postagem',
+      );
+    }
+
+    const deslike = await this.postRepository.createDeslike({
+      user: {
+        connect: {
+          id: userId,
+        },
+      },
+      post: {
+        connect: {
+          id: postId,
+        },
+      },
+    });
+
+    return { id: deslike.id };
   }
 }
