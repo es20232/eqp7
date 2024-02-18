@@ -177,6 +177,12 @@ describe('PostController (e2e)', () => {
         .field('description', 'hello world')
         .expect(HttpStatus.UNPROCESSABLE_ENTITY);
     });
+
+    it('should not let a not signed-in user create a post', async () => {
+      await request(app.getHttpServer())
+        .post('/post')
+        .expect(HttpStatus.FORBIDDEN);
+    });
   });
 
   describe('GET /post', () => {
@@ -260,6 +266,12 @@ describe('PostController (e2e)', () => {
         .post(`/post/${post.id}/like`)
         .set('Authorization', `Bearer ${token}`)
         .expect(HttpStatus.CONFLICT);
+    });
+
+    it('should not let a not signed-in user likes a post', async () => {
+      await request(app.getHttpServer())
+        .post(`/post/${post.id}/like`)
+        .expect(HttpStatus.FORBIDDEN);
     });
   });
 
