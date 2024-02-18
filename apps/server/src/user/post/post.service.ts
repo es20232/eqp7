@@ -104,7 +104,14 @@ export class PostService {
   async getPostLikes(id: number, cursor?: number, take?: number) {
     const likes = await this.postRepository.getPostLikes(id, cursor, take);
 
-    const transformedData = likes.data.map((like) => {
+    const likesWithPictureUrl = await Promise.all(
+      likes.data.map(async (like) => ({
+        ...like,
+        user: await this.userService.getProfile(like.userId),
+      })),
+    );
+
+    const transformedData = likesWithPictureUrl.map((like) => {
       return new PostLikesResponseDto(like);
     });
 
@@ -118,7 +125,14 @@ export class PostService {
       take,
     );
 
-    const transformedData = deslikes.data.map((deslike) => {
+    const deslikesWithPictureUrl = await Promise.all(
+      deslikes.data.map(async (deslike) => ({
+        ...deslike,
+        user: await this.userService.getProfile(deslike.userId),
+      })),
+    );
+
+    const transformedData = deslikesWithPictureUrl.map((deslike) => {
       return new PostDeslikesResponseDto(deslike);
     });
 
@@ -132,7 +146,14 @@ export class PostService {
       take,
     );
 
-    const transformedData = comments.data.map((comment) => {
+    const commentsWithPictureUrl = await Promise.all(
+      comments.data.map(async (comment) => ({
+        ...comment,
+        user: await this.userService.getProfile(comment.userId),
+      })),
+    );
+
+    const transformedData = commentsWithPictureUrl.map((comment) => {
       return new PostCommentsResponseDto(comment);
     });
 

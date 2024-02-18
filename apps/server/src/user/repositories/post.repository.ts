@@ -103,9 +103,6 @@ export class PostRepository {
       return paginator<PostCommentsResponseDto>(
         {
           model: this.prismaService.postComments,
-          include: {
-            user: true,
-          },
           take,
           cursor,
         },
@@ -124,9 +121,6 @@ export class PostRepository {
       return paginator<PostLikesResponseDto>(
         {
           model: this.prismaService.postLikes,
-          include: {
-            user: true,
-          },
           take,
           cursor,
         },
@@ -145,9 +139,6 @@ export class PostRepository {
       return paginator<PostDeslikesResponseDto>(
         {
           model: this.prismaService.postDeslikes,
-          include: {
-            user: true,
-          },
           take,
           cursor,
         },
