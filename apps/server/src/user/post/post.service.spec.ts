@@ -8,6 +8,7 @@ import { mockDeep } from 'jest-mock-extended';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PostRepository } from '../repositories/post.repository';
 import { UserRepository } from '../repositories/user.repository';
+import { UserService } from '../user.service';
 import {
   mockCreateCommentData,
   mockGetPostData,
@@ -65,6 +66,12 @@ describe('PostService', () => {
             createLike: jest.fn(),
             getPost: jest.fn(),
             getAllPosts: jest.fn(),
+          },
+        },
+        {
+          provide: UserService,
+          useValue: {
+            getProfile: jest.fn().mockResolvedValue(mockUserReturnData),
           },
         },
       ],
@@ -310,6 +317,7 @@ describe('PostService', () => {
             totalLikes: 1,
             totalComments: 1,
             totalDeslikes: 1,
+            user: mockUserReturnData,
           },
         ],
       });
