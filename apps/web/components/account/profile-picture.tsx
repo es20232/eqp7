@@ -69,7 +69,7 @@ export function ProfilePicture() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <div className="group absolute -top-16 left-0 flex size-24 items-center justify-center overflow-hidden  rounded-full bg-gray-950 ring-4 ring-white first-letter:-top-16 md:-top-24 md:size-36">
+        <div className="group relative flex size-24 items-center justify-center overflow-hidden  rounded-full bg-gray-950  md:size-32">
           <NextImage
             src={user?.profilePictureUrl ?? '/avatar.jpg'}
             alt="Foto de perfil"
@@ -78,7 +78,7 @@ export function ProfilePicture() {
             height={180}
             unoptimized={true}
           />
-          <span className="absolute flex h-full w-full items-center justify-center rounded-full bg-primary/25 opacity-0 transition group-hover:opacity-100 group-hover:backdrop-blur-md">
+          <span className="absolute flex h-full w-full items-center justify-center rounded-full bg-primary/40 opacity-0 transition group-hover:opacity-100">
             <Camera className="size-8 text-white drop-shadow-2xl transition-all" />
           </span>
         </div>
