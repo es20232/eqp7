@@ -1,8 +1,8 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { Redef } from '@/components/account/redef'
 import { ArrowLeft } from 'lucide-react'
 import { getServerSession } from '@/lib/auth/getServerSession'
+import { EditProfile } from '@/components/account/edit-profile'
 
 export default async function Edit() {
   const {
@@ -10,15 +10,15 @@ export default async function Edit() {
   } = await getServerSession()
   return (
     <div className="mx-auto flex max-w-2xl flex-col justify-between p-5">
-      <Link href="/account" className="mb-4">
-        <Button variant="ghost" className="-translate-x-3">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Voltar
-        </Button>
-      </Link>
-
-      <h3 className="mb-4 text-xl font-bold md:text-2xl">Editar Perfil</h3>
-      <Redef user={user} />
+      <header className="mb-4 flex items-center space-x-2 border-b pb-2">
+        <Link href="/account">
+          <Button variant="ghost" size="icon">
+            <ArrowLeft className="size-5" />
+          </Button>
+        </Link>
+        <h3 className="text-xl font-semibold md:text-2xl">Editar Perfil</h3>
+      </header>
+      <EditProfile user={user} />
     </div>
   )
 }

@@ -13,6 +13,7 @@ import { Input } from '../ui/input'
 import { Label } from '../ui/label'
 import { Spinner } from '../ui/spinner'
 import { useToast } from '../ui/use-toast'
+import { Textarea } from '../ui/textarea'
 
 type FormValues = {
   name: string
@@ -20,11 +21,11 @@ type FormValues = {
   bio: string
 }
 
-type RedefProps = {
+type EditProfileProps = {
   user?: User
 }
 
-export function Redef({ user }: RedefProps) {
+export function EditProfile({ user }: EditProfileProps) {
   const [errorMessage, setErrorMessage] = useState('')
   const router = useRouter()
   const { toast } = useToast()
@@ -47,6 +48,8 @@ export function Redef({ user }: RedefProps) {
       bio: user?.bio ?? '',
     },
   })
+
+  const bioCharacterCount = form.watch('bio').length
 
   async function onSubmit(values: FormValues) {
     try {
@@ -90,15 +93,24 @@ export function Redef({ user }: RedefProps) {
           control={form.control}
           render={({ field }) => (
             <FormItem>
-              <Label>Biografia</Label>
-              <Input {...field} />
+              <Label className="flex justify-between">
+                Biografia
+                <span className="text-xs font-normal text-muted-foreground">
+                  {bioCharacterCount} / 200
+                </span>
+              </Label>
+              <Textarea
+                {...field}
+                maxLength={200}
+                onChange={(e) => bioCharacterCount < 200 && field.onChange(e)}
+              />
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button size="lg" disabled={isLoading} type="submit">
+        <Button disabled={isLoading} type="submit" className="w-full md:w-auto">
           {isLoading && <Spinner size="sm" className="mr-2" />}
-          Redefinir
+          Salvar
         </Button>
       </form>
     </Form>
