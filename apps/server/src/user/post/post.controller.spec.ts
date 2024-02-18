@@ -71,6 +71,9 @@ export const mockPaginatedPostsData = {
   data: [
     new PostResponseDto({
       ...mockGetPostData,
+      totalComments: 1,
+      totalDeslikes: 1,
+      totalLikes: 1,
       postImages: [
         {
           postId: 1,

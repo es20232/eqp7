@@ -317,7 +317,6 @@ describe('PostService', () => {
             totalLikes: 1,
             totalComments: 1,
             totalDeslikes: 1,
-            user: mockUserReturnData,
           },
         ],
       });
