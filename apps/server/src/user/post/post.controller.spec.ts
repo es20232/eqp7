@@ -190,6 +190,7 @@ describe('PostController', () => {
         ],
         totalComments: 1,
         totalLikes: 1,
+        totalDeslikes: 1,
       });
 
       const result = await controller.getPost(1);
@@ -204,6 +205,7 @@ describe('PostController', () => {
         ],
         totalComments: 1,
         totalLikes: 1,
+        totalDeslikes: 1,
       });
     });
   });
@@ -217,6 +219,7 @@ describe('PostController', () => {
             ...mockPaginatedPostsData.data[0],
             totalLikes: 1,
             totalComments: 1,
+            totalDeslikes: 1,
           },
         ],
       });
@@ -231,6 +234,7 @@ describe('PostController', () => {
             ...mockPaginatedPostsData.data[0],
             totalLikes: 1,
             totalComments: 1,
+            totalDeslikes: 1,
           },
         ],
       });

@@ -81,6 +81,8 @@ export class PostService {
 
     const totalComments = await this.postRepository.countPostComments(id);
 
+    const totalDeslikes = await this.postRepository.countPostDeslikes(id);
+
     const url = `${process.env.APP_URL}/uploads`;
 
     const postWithUrl = {
@@ -91,6 +93,7 @@ export class PostService {
       })),
       totalLikes,
       totalComments,
+      totalDeslikes,
     };
 
     return new PostResponseDto(postWithUrl);
