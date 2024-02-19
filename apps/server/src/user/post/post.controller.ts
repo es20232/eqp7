@@ -22,6 +22,8 @@ import { CreateCommentDto, CreatePostDto } from './dto/post.dto';
 import { PostService } from './post.service';
 
 @ApiTags('post')
+@ApiBearerAuth('jwt')
+@UseGuards(AuthGuard)
 @Controller('post')
 export class PostController {
   constructor(private readonly postService: PostService) {}
@@ -43,8 +45,6 @@ export class PostController {
     }),
   )
   @ApiConsumes('multipart/form-data')
-  @ApiBearerAuth('jwt')
-  @UseGuards(AuthGuard)
   @Post()
   createPost(
     @User('id') userId: number,
@@ -62,15 +62,11 @@ export class PostController {
     return this.postService.createPost(body, images, userId);
   }
 
-  @ApiBearerAuth('jwt')
-  @UseGuards(AuthGuard)
   @Delete(':id')
   deletePost(@User('id') userId: number, @Param('id') id: number) {
     return this.postService.deletePost(id, userId);
   }
 
-  @ApiBearerAuth('jwt')
-  @UseGuards(AuthGuard)
   @Delete(':id/:commentId')
   deleteComments(
     @Param('id') postId: number,
@@ -81,16 +77,17 @@ export class PostController {
   }
 
   @Get(':id')
-  getPost(@Param('id') id: number) {
-    return this.postService.getPost(id);
+  getPost(@Param('id') id: number, @User('id') userId: number) {
+    return this.postService.getPost(id, userId);
   }
 
   @Get()
   getAllPosts(
     @Query()
     { cursor, take }: PaginationParamsDto,
+    @User('id') userId: number,
   ) {
-    return this.postService.getAllPosts(cursor, take);
+    return this.postService.getAllPosts(userId, cursor, take);
   }
 
   @Get(':id/likes')
@@ -120,8 +117,6 @@ export class PostController {
     return this.postService.getPostComments(id, cursor, take);
   }
 
-  @ApiBearerAuth('jwt')
-  @UseGuards(AuthGuard)
   @Post(':id/comment')
   createComment(
     @Body() body: CreateCommentDto,
@@ -131,15 +126,11 @@ export class PostController {
     return this.postService.createComment(id, userId, body);
   }
 
-  @ApiBearerAuth('jwt')
-  @UseGuards(AuthGuard)
   @Post(':id/like')
   createLike(@User('id') userId: number, @Param('id') id: number) {
     return this.postService.createLike(id, userId);
   }
 
-  @ApiBearerAuth('jwt')
-  @UseGuards(AuthGuard)
   @Post(':id/deslike')
   createDeslike(@User('id') userId: number, @Param('id') id: number) {
     return this.postService.createDeslike(id, userId);
