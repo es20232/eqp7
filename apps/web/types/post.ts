@@ -7,5 +7,6 @@ export type Post = {
   postImages: string[]
   user: User
   totalLikes: number
+  totalDeslikes: number
   totalComments: number
 }
