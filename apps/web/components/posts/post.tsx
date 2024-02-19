@@ -1,31 +1,12 @@
-import { like } from '@/actions/like'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { useAction } from '@/hooks/use-action'
 import { getInitials } from '@/lib/utils'
 import { Post as PostType } from '@/types/post'
-import { MessageSquare, ThumbsDown, ThumbsUp } from 'lucide-react'
-import { useState } from 'react'
+import { MessageSquare } from 'lucide-react'
 import { Button } from '../ui/button'
-import { useToast } from '../ui/use-toast'
+import { Like } from './like'
+import { Deslike } from './deslike'
 
 export function Post(post: PostType) {
-  const [likes, setLikes] = useState(post.totalLikes)
-  const { toast } = useToast()
-
-  const { execute } = useAction(like, {
-    onError: (error) =>
-      toast({
-        title: 'Erro ao dar like',
-        description: error,
-        variant: "destructive",
-      }),
-    onSuccess: () => {
-      setLikes((prevLikes) => prevLikes + 1)
-    },
-  })
-  async function handleLike() {
-    await execute({ id: post.id })
-  }
   return (
     <div key={post.id} className="rounded-md border p-20 shadow">
       <div className="flex items-center gap-4">
@@ -48,16 +29,8 @@ export function Post(post: PostType) {
       <p className="text-muted-foreground">{post.description}</p>
 
       <div className="mt-4 flex">
-        <Button variant="outline" onClick={handleLike}>
-          <ThumbsUp className="h-5 w-5 text-blue-500" />
-          <span className="ml-2">{likes}</span>
-        </Button>
-
-        <Button variant="outline" className="ml-4">
-          <ThumbsDown className="h-5 w-5 text-red-500" />
-          <span className="ml-2">{post.totalDeslikes}</span>
-        </Button>
-
+        <Like initialLikes={post.totalLikes} postId={post.id} />
+        <Deslike initialDeslikes={post.totalDeslikes} postId={post.id} />
         <Button variant="outline" className="ml-4">
           <MessageSquare className="h-5 w-5 text-green-500" />
           <span className="ml-2">{post.totalComments}</span>
