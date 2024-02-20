@@ -5,7 +5,7 @@ import { ActionState } from '@/types/actions'
 import { Post } from '@/types/post'
 
 type InputType = {
-  cursor?: number
+  cursor: number | null
 }
 
 type ReturnType = {
@@ -15,9 +15,10 @@ type ReturnType = {
 }
 
 export async function getPosts({
-  cursor = 1,
+  cursor,
 }: InputType): Promise<ActionState<ReturnType>> {
-  const response = await fetchWithAuth(`/post?cursor=${cursor}`)
+  console.log(cursor)
+  const response = await fetchWithAuth(`/post?${cursor && 'cursor=' + cursor}`)
   const data = await response.json()
 
   if (!response.ok) {
