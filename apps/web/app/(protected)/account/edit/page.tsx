@@ -10,7 +10,7 @@ export default async function Edit() {
   } = await getServerSession()
   return (
     <div className="mx-auto flex max-w-2xl flex-col justify-between p-5">
-      <header className="mb-4 flex items-center space-x-2 border-b pb-2">
+      <header className="mb-8 flex items-center space-x-2 border-b pb-2">
         <Link href="/account">
           <Button variant="ghost" size="icon">
             <ArrowLeft className="size-5" />

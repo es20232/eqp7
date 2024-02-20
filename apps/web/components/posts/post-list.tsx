@@ -21,7 +21,7 @@ export function PostList() {
         <span>Error: {error?.message}</span>
       ) : (
         <>
-          <div className="space-y-4">
+          <div className="space-y-8">
             {data?.pages.map((page) => (
               <React.Fragment key={page.nextCursor}>
                 {page.posts?.map((post) => <Post {...post} key={post.id} />)}

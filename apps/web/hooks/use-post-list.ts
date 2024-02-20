@@ -16,11 +16,11 @@ export function usePostList() {
     hasNextPage,
   } = useInfiniteQuery({
     queryKey: ['posts'],
-    queryFn: async ({ pageParam = 1 }) => {
+    queryFn: async ({ pageParam }) => {
       const data = await getPosts({ cursor: pageParam })
       return { ...data.data }
     },
-    initialPageParam: 1,
+    initialPageParam: null,
     getPreviousPageParam: (firstPage) => firstPage.previousCursor ?? undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
   })
