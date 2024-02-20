@@ -1,7 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { getInitials } from '@/lib/utils'
 import { Post as PostType } from '@/types/post'
-import { MessageCircleMore } from 'lucide-react'
 import { Button } from '../ui/button'
 import { Like } from './like'
 import { Deslike } from './deslike'
@@ -29,7 +28,7 @@ export function Post(post: PostType) {
   return (
     <div key={post.id}>
       <div>
-        <Carousel className="aspect-[9/16] max-h-[70vh] ">
+        <Carousel className="aspect-[9/16] h-[70vh]">
           <header className="mb-2 flex justify-between space-x-2 rounded-md">
             <div className="flex items-center gap-2">
               {post.user?.profilePictureUrl ? (
