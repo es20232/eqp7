@@ -55,8 +55,9 @@ describe('PostService', () => {
           provide: PostRepository,
           useValue: {
             findPostById: jest.fn().mockResolvedValue(mockPostReturnData),
-            findCommentByUserId: jest.fn().mockReturnValue(null),
-            findLikeByUserId: jest.fn().mockReturnValue(null),
+            findCommentByUserId: jest.fn().mockResolvedValue(false),
+            findLikeByUserId: jest.fn().mockResolvedValue(false),
+            findDeslikeByUserId: jest.fn().mockResolvedValue(false),
             countPostLikes: jest.fn().mockReturnValue(1),
             countPostComments: jest.fn().mockResolvedValue(1),
             countPostDeslikes: jest.fn().mockResolvedValue(1),
@@ -270,7 +271,7 @@ describe('PostService', () => {
     it('should return transformed post data', async () => {
       jest.spyOn(postRepository, 'getPost').mockResolvedValue(mockGetPostData);
 
-      const result = await service.getPost(1);
+      const result = await service.getPost(1, 1);
 
       expect(postRepository.countPostLikes).toHaveBeenCalled();
       expect(postRepository.countPostComments).toHaveBeenCalled();
@@ -285,6 +286,9 @@ describe('PostService', () => {
         totalComments: 1,
         totalLikes: 1,
         totalDeslikes: 1,
+        hasUserLiked: false,
+        hasUserDesliked: false,
+        hasUserCommented: false,
       });
     });
   });
@@ -296,7 +300,7 @@ describe('PostService', () => {
         new InternalServerErrorException('Erro interno ao buscar post'),
       );
 
-    await expect(service.getPost(1)).rejects.toThrow(
+    await expect(service.getPost(1, 1)).rejects.toThrow(
       new InternalServerErrorException('Erro interno ao buscar post'),
     );
   });
@@ -317,6 +321,9 @@ describe('PostService', () => {
             totalLikes: 1,
             totalComments: 1,
             totalDeslikes: 1,
+            hasUserLiked: false,
+            hasUserDesliked: false,
+            hasUserCommented: false,
           },
         ],
       });

@@ -127,9 +127,9 @@ describe('PostController (e2e)', () => {
 
   describe('GET /post:id', () => {
     it('should return a post', async () => {
-      const { status, body } = await request(app.getHttpServer()).get(
-        `/post/${post.id}`,
-      );
+      const { status, body } = await request(app.getHttpServer())
+        .get(`/post/${post.id}`)
+        .set('Authorization', `Bearer ${token}`);
 
       expect(status).toBe(200);
       expect(body).toEqual({
@@ -153,6 +153,9 @@ describe('PostController (e2e)', () => {
         totalComments: 0,
         totalLikes: 0,
         totalDeslikes: 0,
+        hasUserLiked: false,
+        hasUserCommented: false,
+        hasUserDesliked: false,
       });
     });
   });
@@ -189,6 +192,7 @@ describe('PostController (e2e)', () => {
     it('should return all posts', async () => {
       const { status, body } = await request(app.getHttpServer())
         .get('/post')
+        .set('Authorization', `Bearer ${token}`)
         .query({
           cursor: 1,
           take: 10,
@@ -219,6 +223,9 @@ describe('PostController (e2e)', () => {
         totalLikes: expect.any(Number),
         totalDeslikes: expect.any(Number),
         totalComments: expect.any(Number),
+        hasUserLiked: expect.any(Boolean),
+        hasUserCommented: expect.any(Boolean),
+        hasUserDesliked: expect.any(Boolean),
       });
       expect(body.meta).toMatchObject({
         cursor: expect.any(Number),
@@ -277,9 +284,9 @@ describe('PostController (e2e)', () => {
 
   describe('GET /post/:id/comments', () => {
     it('should return all the comments from a post', async () => {
-      const { status, body } = await request(app.getHttpServer()).get(
-        `/post/${post.id}/comments`,
-      );
+      const { status, body } = await request(app.getHttpServer())
+        .get(`/post/${post.id}/comments`)
+        .set('Authorization', `Bearer ${token}`);
 
       expect(status).toBe(200);
 
@@ -305,9 +312,9 @@ describe('PostController (e2e)', () => {
 
   describe('GET /post/:id/likes', () => {
     it('should return all the likes from a post', async () => {
-      const { status, body } = await request(app.getHttpServer()).get(
-        `/post/${post.id}/likes`,
-      );
+      const { status, body } = await request(app.getHttpServer())
+        .get(`/post/${post.id}/likes`)
+        .set('Authorization', `Bearer ${token}`);
 
       expect(status).toBe(200);
 
