@@ -66,7 +66,6 @@ export async function deleteComment({
   id,
   postId,
 }: DeleteCommentInputType): Promise<ActionState<string>> {
-  console.log(id)
   const response = await fetchWithAuth(`/post/${postId}/${id}`, {
     method: 'DELETE',
   })
