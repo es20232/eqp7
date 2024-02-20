@@ -17,7 +17,6 @@ import Image from 'next/image'
 import { usePostModalStore } from '@/hooks/use-post-modal-store'
 
 export function Post(post: PostType) {
-  console.log(post)
   const [setIsOpen, setPost] = usePostModalStore((state) => [
     state.setIsOpen,
     state.setPost,
@@ -45,7 +44,7 @@ export function Post(post: PostType) {
               )}
               <span className="text-sm font-medium">{post.user.username}</span>
             </div>
-            <div>
+            <div className="space-x-2">
               <CarouselPreviousRelative />
               <CarouselNextRelative />
             </div>

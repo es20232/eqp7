@@ -19,15 +19,12 @@ export default async function ProtectedLayout({
   return (
     <>
       <div className="min-h-[100svh] w-full ">
-        <header className=" border-b px-4 py-3">
+        <header className="sticky top-0 z-10 border-b bg-white/70 px-4 py-3 backdrop-blur-lg">
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-6">
             <Link href="/">
               <Image src={Logo} alt="VisualSocial logo" className="size-10" />
             </Link>
-            <div className="relative w-full max-w-md">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Pesquisar" className="pl-8" />
-            </div>
+
             <Link href="/account">
               <UserAvatar
                 avatarUrl={user?.profilePictureUrl}

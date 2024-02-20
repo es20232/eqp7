@@ -6,6 +6,8 @@ import { CommentsEmptyState } from './comments-empty-state'
 import { useQuery } from '@tanstack/react-query'
 import { getComments } from '@/actions/comments'
 import { Spinner } from '../ui/spinner'
+import { getInitials } from '@/lib/utils'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 
 export function CommentSection() {
   const [post, isOpen] = usePostModalStore((state) => [
@@ -26,13 +28,23 @@ export function CommentSection() {
   return (
     <section className="flex h-full w-full  flex-col">
       <header className=" border-b pb-3">
-        <Comment
-          avatarUrl={post.user.profilePictureUrl}
-          username={post.user.username}
-          name={post.user.name}
-          content={post.description ?? ''}
-          date={post.date}
-        />
+        <div className="flex w-full space-x-4">
+          <span>
+            <Avatar className="size-10">
+              {post.user.profilePictureUrl && (
+                <AvatarImage src={post.user.profilePictureUrl} />
+              )}
+              <AvatarFallback>{getInitials(post.user.name)}</AvatarFallback>
+            </Avatar>
+          </span>
+          <div>
+            <span className="text-xs font-medium">
+              {post.user.username}
+              <span className="ml-2 text-muted-foreground">{post.date}</span>
+            </span>
+            <p className="text-sm">{post.description}</p>
+          </div>
+        </div>
       </header>
       <ScrollArea className="flex h-[0px] w-full flex-1 flex-shrink basis-auto flex-col py-4 pr-3">
         {isFetching && <Spinner color="primary" size={'lg'} />}
@@ -41,11 +53,9 @@ export function CommentSection() {
             data?.data?.map((comment) => (
               <div key={comment.id} className="w-full border-b py-3">
                 <Comment
-                  avatarUrl={comment.user.profilePictureUrl}
-                  username={comment.user.username}
-                  name={comment.user.name}
-                  content={comment.comment}
-                  date={comment.date}
+                  comment={comment}
+                  ownerId={post.user.id}
+                  postId={post.id}
                 />
               </div>
             ))

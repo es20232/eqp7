@@ -1,34 +1,43 @@
 import { getInitials } from '@/lib/utils'
 import { AvatarImage, AvatarFallback, Avatar } from '@/components/ui/avatar'
+import useSession from '@/lib/auth/useSession'
+import { Comment } from '@/types/post'
+import { DeleteComment } from './delete-comment'
 
 type CommentProps = {
-  avatarUrl: string
-  username: string
-  content: string
-  name: string
-  date: string
+  comment: Comment
+  ownerId: number
+  postId: number
 }
 
 export function Comment({
-  avatarUrl,
-  content,
-  username,
-  name,
-  date,
+  comment: { comment, date, user, id },
+  ownerId,
+  postId,
 }: CommentProps) {
+  const { user: currentUser } = useSession()
+
+  const isOwner = currentUser?.id === ownerId
+
   return (
-    <div className="flex space-x-4">
+    <div className="flex w-full space-x-4">
       <span>
         <Avatar className="size-10">
-          {avatarUrl && <AvatarImage src={avatarUrl} />}
-          <AvatarFallback>{getInitials(name)}</AvatarFallback>
+          {user.profilePictureUrl && (
+            <AvatarImage src={user.profilePictureUrl} />
+          )}
+          <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
         </Avatar>
       </span>
-      <div>
-        <span className="text-xs font-medium">
-          {username} <span className="ml-2 text-muted-foreground">{date}</span>
-        </span>
-        <p className="text-sm">{content}</p>
+      <div className="flex w-full items-center">
+        <div className="w-full">
+          <span className="text-xs font-medium">
+            {user.username}
+            <span className="ml-2 text-muted-foreground">{date}</span>
+          </span>
+          <p className="text-sm">{comment}</p>
+        </div>
+        {isOwner && <DeleteComment id={id} postId={postId} />}
       </div>
     </div>
   )

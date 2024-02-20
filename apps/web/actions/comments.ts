@@ -1,7 +1,7 @@
 'use server'
 
 import { fetchWithAuth } from '@/lib/fetch-with-auth'
-import { ActionState } from '@/types/actions'
+import { ActionState, ActionState } from '@/types/actions'
 import { revalidateTag } from 'next/cache'
 import { Comment } from '@/types/post'
 
@@ -29,8 +29,6 @@ export async function addComment({
     return { error: data.message ?? 'Ocorreu um erro inesperado' }
   }
 
-  revalidateTag(`post-${postId}-comments`)
-
   return { data: 'Comentário adicionado com sucesso' }
 }
 
@@ -57,4 +55,26 @@ export async function getComments({
   return {
     data: comments,
   }
+}
+
+type DeleteCommentInputType = {
+  id: number
+  postId: number
+}
+
+export async function deleteComment({
+  id,
+  postId,
+}: DeleteCommentInputType): Promise<ActionState<string>> {
+  console.log(id)
+  const response = await fetchWithAuth(`/post/${postId}/${id}`, {
+    method: 'DELETE',
+  })
+
+  if (!response.ok) {
+    const data = await response.json()
+    return { error: data.message ?? 'Ocorreu um erro inesperado' }
+  }
+
+  return { data: 'Comentário excluido com sucesso' }
 }
