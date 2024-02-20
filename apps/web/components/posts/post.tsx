@@ -68,7 +68,7 @@ export function Post(post: PostType) {
         </Carousel>
       </div>
 
-      <div className="mt-2 flex justify-center space-x-2 border-b border-t py-1">
+      <div className="mt-12 flex justify-center space-x-2 border-b border-t py-1">
         <Like
           initialLikes={post.totalLikes}
           postId={post.id}
