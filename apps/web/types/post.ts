@@ -13,6 +13,7 @@ export type Post = {
   postImages: PostImage[]
   user: User
   totalLikes: number
+  totalDeslikes: number
   totalComments: number
   hasUserLiked: boolean
   hasUserDisliked: boolean
