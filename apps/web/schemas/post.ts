@@ -1,8 +1,8 @@
 import { z } from 'zod'
 
 export const postSchema = z.object({
-  description: z.string().min(1, {
-    message: 'O campo é obrigatório',
+  description: z.string(),
+  images: z.any().refine((files) => files && files.length > 0, {
+    message: 'Selecione pelo menos uma imagem',
   }),
-  images: z.array(z.instanceof(File)),
 })
