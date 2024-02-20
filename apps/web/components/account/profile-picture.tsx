@@ -20,7 +20,6 @@ import {
 import { Camera, ImagePlus } from 'lucide-react'
 import NextImage from 'next/image'
 import { useEffect, useState } from 'react'
-
 import 'react-image-crop/dist/ReactCrop.css'
 import { getCroppedImg } from '@/lib/utils'
 import { editUser } from '@/actions/user'

@@ -92,8 +92,6 @@ export async function middleware(req: NextRequest) {
 
   const tokens = await tokensResponse.json()
 
-  console.log(tokens)
-
   const response = NextResponse.redirect(nextUrl)
 
   response.cookies.set('access_token', JSON.stringify(tokens.accessToken), {
