@@ -15,11 +15,11 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
 import { User } from 'src/decorators/user.decorator';
+import { PaginationParamsDto } from 'src/dtos/paginator.dto';
 import { AuthGuard } from 'src/guards/auth.guard';
 import { UpdateUserDto } from './dto/user.dto';
 import { PostService } from './post/post.service';
 import { UserService } from './user.service';
-import { PaginationParamsDto } from 'src/dtos/paginator.dto';
 
 @ApiTags('user')
 @Controller('user')
@@ -40,10 +40,11 @@ export class UserController {
   @ApiBearerAuth('jwt')
   @Get(':id/posts')
   getUserPosts(
-    @Param('id') userId: number,
+    @Param('id') userPostId: number,
     @Query() { cursor, take }: PaginationParamsDto,
+    @User('id') userId: number,
   ) {
-    return this.postService.getUserPosts(userId, cursor, take);
+    return this.postService.getUserPosts(userPostId, userId, cursor, take);
   }
 
   @UseInterceptors(

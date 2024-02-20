@@ -142,6 +142,15 @@ export class PostResponseDto {
   @Type(() => UserResponseDto)
   user: UserResponseDto;
 
+  @ApiProperty()
+  hasUserLiked: boolean;
+
+  @ApiProperty()
+  hasUserDesliked: boolean;
+
+  @ApiProperty()
+  hasUserCommented: boolean;
+
   constructor(partial: Partial<PostResponseDto>) {
     Object.assign(this, partial);
   }
