@@ -1,20 +1,23 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { ReceiptText } from 'lucide-react'
 import { ProfileMoreActions } from '@/components/account/profile-more-actions'
 import { getServerSession } from '@/lib/auth/getServerSession'
 import { ProfilePicture } from '../../../components/account/profile-picture'
 import { PostGallery } from '@/components/account/post-gallery'
 import { fetchWithAuth } from '@/lib/fetch-with-auth'
 import { Post } from '@/types/post'
+import { Plus } from 'lucide-react'
 
 export default async function Account() {
   const {
     session: { user },
   } = await getServerSession()
 
-  const response = await fetchWithAuth(`/user/${user?.id}/posts?take=100`)
-
+  const response = await fetchWithAuth(`/user/${user?.id}/posts?take=100`, {
+    next: {
+      tags: ['profile-posts'],
+    },
+  })
   const data = await response.json()
   const posts: Post[] = data.data
 
@@ -33,9 +36,9 @@ export default async function Account() {
         </div>
         <div className="col-start-3 row-start-1 flex space-x-2">
           <Link href="/account/post">
-            <Button variant="outline">
-              <ReceiptText className="mr-2 h-6 w-5" />
-              Publicação
+            <Button>
+              <Plus className="mr-2 size-4" />
+              Nova Publicação
             </Button>
           </Link>
           <ProfileMoreActions />
