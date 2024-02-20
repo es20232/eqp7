@@ -1,6 +1,6 @@
 import { deslike } from '@/actions/deslike'
 import { useAction } from '@/hooks/use-action'
-import { ThumbsUp } from 'lucide-react'
+import { ThumbsDown, ThumbsUp } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '../ui/button'
 import { useToast } from '../ui/use-toast'
@@ -30,7 +30,7 @@ export function Deslike({ initialDeslikes, postId }: DeslikeProps) {
   }
   return (
     <Button variant="outline" onClick={handleDeslike}>
-      <ThumbsUp className="h-5 w-5 text-blue-500" />
+      <ThumbsDown className="h-5 w-5 text-red-500" />
       <span className="ml-2">{deslikes}</span>
     </Button>
   )
