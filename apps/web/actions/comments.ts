@@ -1,8 +1,7 @@
 'use server'
 
 import { fetchWithAuth } from '@/lib/fetch-with-auth'
-import { ActionState, ActionState } from '@/types/actions'
-import { revalidateTag } from 'next/cache'
+import { ActionState } from '@/types/actions'
 import { Comment } from '@/types/post'
 
 type AddCommentInputType = {
