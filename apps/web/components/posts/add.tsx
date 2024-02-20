@@ -12,10 +12,13 @@ import { editUser } from '@/actions/user'
 import { useAction } from '@/hooks/use-action'
 import { useRouter } from 'next/navigation'
 import { useToast } from '../ui/use-toast'
+import { ImagePlus } from 'lucide-react'
+import { Textarea } from '../ui/textarea'
 
 type FormValues = {
   descr: string
 }
+// const descrCharacterCount = Form.watch('descr').length
 
 export function Add() {
   const [errorMessage, setErrorMessage] = useState('')
@@ -41,11 +44,6 @@ export function Add() {
       const formData = new FormData()
       formData.append('descr', descr)
 
-      // // Adiciona a foto ao formData
-      // if (fileInputRef.current.files.length > 0) {
-      //   formData.append('photo', fileInputRef.current.files[0])
-      // }
-
       await execute(formData)
     } catch (error) {
       setErrorMessage('Ocorreu um erro inesperado')
@@ -61,15 +59,28 @@ export function Add() {
           control={form.control}
           render={({ field }) => (
             <FormItem>
-              <Label>Descrição</Label>
-              <Input {...field} />
+              <Label>
+                Descrição
+                <span className="text-xs font-normal text-muted-foreground">
+                  {/* {descrCharacterCount} / 500 */}
+                </span>
+              </Label>
+              <Textarea
+                {...field}
+                className="h-20"
+                // onChange={(e) => descrCharacterCount < 500 && field.onChange(e)}
+              />
               <FormMessage />
             </FormItem>
           )}
         />
         <FormItem>
-          <Label>Foto</Label>
-          <input type="file" ref={fileInputRef} />
+          <div className="flex items-center">
+            <label htmlFor="file-upload" className="cursor-pointer">
+              <ImagePlus size={24} />
+            </label>
+            <Input id="file-upload" type="file" className="hidden" />
+          </div>
         </FormItem>
         <Button size="lg" disabled={isLoading} type="submit">
           {isLoading && <Spinner size="sm" className="mr-2" />}

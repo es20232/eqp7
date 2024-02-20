@@ -4,7 +4,7 @@ import { Add } from '@/components/posts/add'
 import { ArrowLeft } from 'lucide-react'
 import { getServerSession } from '@/lib/auth/getServerSession'
 
-export default async function Edit() {
+export default async function CreatePost() {
   const {
     session: { user },
   } = await getServerSession()
