@@ -16,7 +16,7 @@ export type Post = {
   totalDeslikes: number
   totalComments: number
   hasUserLiked: boolean
-  hasUserDisliked: boolean
+  hasUserDesliked: boolean
 }
 
 export type Comment = {

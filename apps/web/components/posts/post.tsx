@@ -1,41 +1,101 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { getInitials } from '@/lib/utils'
 import { Post as PostType } from '@/types/post'
-import { MessageSquare } from 'lucide-react'
+import { MessageCircleMore } from 'lucide-react'
 import { Button } from '../ui/button'
 import { Like } from './like'
 import { Deslike } from './deslike'
+import { AspectRatio } from '@radix-ui/react-aspect-ratio'
+import {
+  Carousel,
+  CarouselPreviousRelative,
+  CarouselNextRelative,
+  CarouselContent,
+  CarouselItem,
+} from '../ui/carousel'
+import Image from 'next/image'
+import { usePostModalStore } from '@/hooks/use-post-modal-store'
 
 export function Post(post: PostType) {
+  console.log(post)
+  const [setIsOpen, setPost] = usePostModalStore((state) => [
+    state.setIsOpen,
+    state.setPost,
+  ])
+
+  function handleOpenPost() {
+    setPost(post)
+    setIsOpen(true)
+  }
   return (
-    <div key={post.id} className="rounded-md border p-20 shadow">
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2">
-          {post.user?.profilePictureUrl ? (
-            <Avatar>
-              <AvatarImage src={post.user?.profilePictureUrl} />
-              <AvatarFallback>{getInitials(post.user.name)}</AvatarFallback>
-            </Avatar>
-          ) : (
-            <Avatar>
-              <AvatarFallback>{getInitials(post.user.name)}</AvatarFallback>
-            </Avatar>
-          )}
-          <span className="text-sm font-medium">{post.user.username}</span>
-        </div>
+    <div key={post.id}>
+      <div>
+        <Carousel className="aspect-[9/16] max-h-[70vh] ">
+          <header className="mb-2 flex justify-between space-x-2 rounded-md">
+            <div className="flex items-center gap-2">
+              {post.user?.profilePictureUrl ? (
+                <Avatar>
+                  <AvatarImage src={post.user?.profilePictureUrl} />
+                  <AvatarFallback>{getInitials(post.user.name)}</AvatarFallback>
+                </Avatar>
+              ) : (
+                <Avatar>
+                  <AvatarFallback>{getInitials(post.user.name)}</AvatarFallback>
+                </Avatar>
+              )}
+              <span className="text-sm font-medium">{post.user.username}</span>
+            </div>
+            <div>
+              <CarouselPreviousRelative />
+              <CarouselNextRelative />
+            </div>
+          </header>
+          <CarouselContent>
+            {post.postImages.map((image) => (
+              <CarouselItem key={image.id}>
+                <AspectRatio ratio={9 / 16}>
+                  <div className="flex h-full w-full items-center rounded-md bg-neutral-950">
+                    <Image
+                      src={image.imageUrl}
+                      alt={`Imagem ${image.id}`}
+                      width={1080}
+                      height={1920}
+                      className="my-auto"
+                    />
+                  </div>
+                </AspectRatio>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+        </Carousel>
       </div>
 
-      <h2 className="text-2xl font-semibold">Post {post.id}</h2>
-      <p className="text-muted-foreground">{post.description}</p>
-
-      <div className="mt-4 flex">
-        <Like initialLikes={post.totalLikes} postId={post.id} />
-        <Deslike initialDeslikes={post.totalDeslikes} postId={post.id} />
-        <Button variant="outline" className="ml-4">
-          <MessageSquare className="h-5 w-5 text-green-500" />
-          <span className="ml-2">{post.totalComments}</span>
-        </Button>
+      <div className="mt-2 flex justify-center space-x-2 border-b border-t py-1">
+        <Like
+          initialLikes={post.totalLikes}
+          postId={post.id}
+          hasLiked={post.hasUserLiked}
+        />
+        <Deslike
+          initialDeslikes={post.totalDeslikes}
+          postId={post.id}
+          hasDesliked={post.hasUserDesliked}
+        />
       </div>
+      <p className="mt-2 text-sm">
+        <span className="mr-2 text-xs font-medium text-muted-foreground">
+          Descrição
+        </span>
+        {post.description}
+      </p>
+      <Button
+        variant="link"
+        onClick={handleOpenPost}
+        size="sm"
+        className="-translate-x-3"
+      >
+        Ver todos os {post.totalComments} comentários
+      </Button>
     </div>
   )
 }
