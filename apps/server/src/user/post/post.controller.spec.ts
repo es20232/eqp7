@@ -191,12 +191,15 @@ describe('PostController', () => {
             imageUrl: `${uploadUrl}/img1.png`,
           },
         ],
+        hasUserLiked: true,
+        hasUserDesliked: false,
+        hasUserCommented: true,
         totalComments: 1,
         totalLikes: 1,
         totalDeslikes: 1,
       });
 
-      const result = await controller.getPost(1);
+      const result = await controller.getPost(1, 1);
 
       expect(result).toEqual({
         ...mockGetPostData,
@@ -209,6 +212,9 @@ describe('PostController', () => {
         totalComments: 1,
         totalLikes: 1,
         totalDeslikes: 1,
+        hasUserLiked: true,
+        hasUserDesliked: false,
+        hasUserCommented: true,
       });
     });
   });
@@ -223,11 +229,14 @@ describe('PostController', () => {
             totalLikes: 1,
             totalComments: 1,
             totalDeslikes: 1,
+            hasUserLiked: true,
+            hasUserDesliked: false,
+            hasUserCommented: true,
           },
         ],
       });
 
-      const result = await controller.getAllPosts({ cursor: 0, take: 10 });
+      const result = await controller.getAllPosts({ cursor: 0, take: 10 }, 1);
 
       expect(postService.getAllPosts).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
@@ -238,6 +247,9 @@ describe('PostController', () => {
             totalLikes: 1,
             totalComments: 1,
             totalDeslikes: 1,
+            hasUserLiked: true,
+            hasUserDesliked: false,
+            hasUserCommented: true,
           },
         ],
       });
